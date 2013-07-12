@@ -35,6 +35,12 @@
 (require 'f)
 (require 'commander)
 
+(defvar ert-selector t
+  "Selector that Ert should run with.")
+
+(defun ert-runner/pattern (pattern)
+  (setq ert-selector pattern))
+
 (defun ert-runner/usage ()
   (commander-print-usage))
 
@@ -53,7 +59,7 @@
      (lambda (test-file)
        (load test-file 'noerror 'nomessage))
      test-files)
-    (ert-run-tests-batch-and-exit t)))
+    (ert-run-tests-batch-and-exit ert-selector)))
 
 (commander
  (name "ert-runner")
@@ -61,6 +67,7 @@
  (default "help")
 
  (option "--help, -h" "Show usage information" 'ert-runner/usage)
+ (option "-p <pattern>" "Run tests matching pattern" 'ert-runner/pattern)
 
  (command "run [*]" "Run all or specified tests" 'ert-runner/run)
  (command "help" "Show usage information" 'ert-runner/usage))
