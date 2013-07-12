@@ -38,11 +38,31 @@
 (defun ert-runner/usage ()
   (commander-print-usage))
 
+(defun ert-runner/run (&rest tests)
+  (let* ((el-tests-fn
+          (lambda (file)
+            (if tests
+                (--any? (s-ends-with? it file) tests)
+              (s-matches? "-test\.el$" file))))
+         (test-files (f-files (f-expand "test") el-tests-fn))
+         (test-helper
+          (f-expand "test-helper.el" "test")))
+    (if (f-exists? test-helper)
+        (load test-helper 'noerror 'nomessage))
+    (-map
+     (lambda (test-file)
+       (load test-file 'noerror 'nomessage))
+     test-files)
+    (ert-run-tests-batch-and-exit t)))
+
 (commander
  (name "ert-runner")
+
  (default "help")
 
  (option "--help, -h" "Show usage information" 'ert-runner/usage)
+
+ (command "run [*]" "Run all or specified tests" 'ert-runner/run)
  (command "help" "Show usage information" 'ert-runner/usage))
 
 ;;; ert-runner.el ends here
