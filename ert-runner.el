@@ -38,8 +38,14 @@
 (defvar ert-runner-selector t
   "Selector that Ert should run with.")
 
+(defvar ert-runner-load-files nil
+  "List of load files.")
+
 (defun ert-runner/pattern (pattern)
   (setq ert-runner-selector pattern))
+
+(defun ert-runner/load (&rest load-files)
+  (setq ert-runner-load-files load-files))
 
 (defun ert-runner/usage ()
   (commander-print-usage))
@@ -53,6 +59,10 @@
          (test-files (f-files (f-expand "test") el-tests-fn))
          (test-helper
           (f-expand "test-helper.el" "test")))
+    (-map
+     (lambda (load-file)
+       (load load-file 'noerror 'nomessage))
+     ert-runner-load-files)
     (if (f-exists? test-helper)
         (load test-helper 'noerror 'nomessage))
     (-map
@@ -68,6 +78,7 @@
 
  (option "--help, -h" "Show usage information" 'ert-runner/usage)
  (option "-p <pattern>" "Run tests matching pattern" 'ert-runner/pattern)
+ (option "-l <*>" "Load files" 'ert-runner/load)
 
  (command "run [*]" "Run all or specified tests" 'ert-runner/run)
  (command "help" "Show usage information" 'ert-runner/usage))
