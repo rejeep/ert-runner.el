@@ -34,6 +34,7 @@
 (require 'dash)
 (require 'f)
 (require 'commander)
+(require 'ansi)
 
 (defvar ert-runner-selector t
   "Selector that Ert should run with.")
@@ -71,6 +72,17 @@
      test-files)
     (ert-run-tests-batch-and-exit ert-runner-selector)))
 
+(defun ert-runner/init (&optional name)
+  (unless name (setq name (f-filename default-directory)))
+  (if (f-dir? "test")
+      (error "Directory `test` already exists."))
+  (f-mkdir "test")
+  (f-write (f-join "test" "test-helper.el"))
+  (f-write (f-join (s-concat name "-test.el")))
+  (message "create %s" (ansi-green "test"))
+  (message "create  %s" (ansi-green "test-helper.el"))
+  (message "create  %s" (ansi-green (s-concat name "-test.el"))))
+
 (commander
  (name "ert-runner")
 
@@ -80,6 +92,7 @@
  (option "-p <pattern>" "Run tests matching pattern" 'ert-runner/pattern)
  (option "-l <*>" "Load files" 'ert-runner/load)
 
+ (command "init [name]" "Create new test project (optional project name)" 'ert-runner/init)
  (command "run [*]" "Run all or specified tests" 'ert-runner/run)
  (command "help" "Show usage information" 'ert-runner/usage))
 
