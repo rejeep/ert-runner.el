@@ -45,6 +45,11 @@ Load custom files before running tests:
 
     $ carton exec ert-runner run -l test/custom.el
 
+Run all tests whose name matches `emacs-23-only` and load `ert.el`
+from vendor since it's not included in Emacs-23:
+
+    $ carton exec ert-runner run -p emacs-23-only -l vendor/ert.el
+
 ## Projects using
 
 * [f.el](https://github.com/rejeep/f.el)
