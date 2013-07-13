@@ -35,11 +35,11 @@
 (require 'f)
 (require 'commander)
 
-(defvar ert-selector t
+(defvar ert-runner-selector t
   "Selector that Ert should run with.")
 
 (defun ert-runner/pattern (pattern)
-  (setq ert-selector pattern))
+  (setq ert-runner-selector pattern))
 
 (defun ert-runner/usage ()
   (commander-print-usage))
@@ -59,7 +59,7 @@
      (lambda (test-file)
        (load test-file 'noerror 'nomessage))
      test-files)
-    (ert-run-tests-batch-and-exit ert-selector)))
+    (ert-run-tests-batch-and-exit ert-runner-selector)))
 
 (commander
  (name "ert-runner")
