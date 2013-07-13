@@ -1,4 +1,4 @@
-;;; ert-runner.el --- TODO
+;;; ert-runner.el --- Opinionated Ert testing workflow
 
 ;; Copyright (C) 2013 Johan Andersson
 
