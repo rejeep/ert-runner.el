@@ -78,7 +78,7 @@
 (defun ert-runner/init (&optional name)
   (unless name (setq name (f-filename default-directory)))
   (if (f-dir? "test")
-      (error "Directory `test` already exists."))
+      (error (ansi-red "Directory `test` already exists.")))
   (f-mkdir ert-runner-test-path)
   (f-write (f-join ert-runner-test-path "test-helper.el"))
   (f-write (f-join (s-concat name "-test.el")))
