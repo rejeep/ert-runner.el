@@ -55,6 +55,8 @@
   (commander-print-usage))
 
 (defun ert-runner/run (&rest tests)
+  (unless (f-dir? ert-runner-test-path)
+    (error (ansi-red "No test directory. Create one using `ert-runner init`")))
   (let* ((el-tests-fn
           (lambda (file)
             (if tests
