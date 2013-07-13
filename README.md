@@ -44,3 +44,8 @@ Run test whose name matches a pattern:
 Load custom files before running tests:
 
     $ carton exec ert-runner run -l test/custom.el
+
+## Projects using
+
+* [f.el](https://github.com/rejeep/f.el)
+* ...
