@@ -42,6 +42,9 @@
 (defvar ert-runner-load-files nil
   "List of load files.")
 
+(defvar ert-runner-test-path (f-expand "test")
+  "Path to test dir.")
+
 (defun ert-runner/pattern (pattern)
   (setq ert-runner-selector pattern))
 
@@ -57,9 +60,9 @@
             (if tests
                 (--any? (s-ends-with? it file) tests)
               (s-matches? "-test\.el$" file))))
-         (test-files (f-files (f-expand "test") el-tests-fn))
+         (test-files (f-files (f-expand ert-runner-test-path) el-tests-fn))
          (test-helper
-          (f-expand "test-helper.el" "test")))
+          (f-expand "test-helper.el" ert-runner-test-path)))
     (-map
      (lambda (load-file)
        (load load-file 'noerror 'nomessage))
@@ -76,10 +79,10 @@
   (unless name (setq name (f-filename default-directory)))
   (if (f-dir? "test")
       (error "Directory `test` already exists."))
-  (f-mkdir "test")
-  (f-write (f-join "test" "test-helper.el"))
+  (f-mkdir ert-runner-test-path)
+  (f-write (f-join ert-runner-test-path "test-helper.el"))
   (f-write (f-join (s-concat name "-test.el")))
-  (message "create %s" (ansi-green "test"))
+  (message "create %s" (ansi-green (f-filename ert-runner-test-path)))
   (message "create  %s" (ansi-green "test-helper.el"))
   (message "create  %s" (ansi-green (s-concat name "-test.el"))))
 
