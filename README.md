@@ -53,4 +53,7 @@ from vendor since it's not included in Emacs-23:
 ## Projects using
 
 * [f.el](https://github.com/rejeep/f.el)
+* [ecukes.el](https://github.com/rejeep/ecukes)
+* [commander.el](https://github.com/rejeep/commander.el)
+* [ansi.el](https://github.com/rejeep/ansi)
 * ...
