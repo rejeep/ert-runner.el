@@ -54,6 +54,11 @@
 (defun ert-runner/usage ()
   (commander-print-usage))
 
+(defun ert-runner--load (file)
+  (if (f-relative? file)
+      (setq file (f-expand file)))
+  (load file nil 'nomessage))
+
 (defun ert-runner/run (&rest tests)
   (unless (f-dir? ert-runner-test-path)
     (error (ansi-red "No test directory. Create one using `ert-runner init`")))
@@ -65,16 +70,10 @@
          (test-files (f-files (f-expand ert-runner-test-path) el-tests-fn))
          (test-helper
           (f-expand "test-helper.el" ert-runner-test-path)))
-    (-map
-     (lambda (load-file)
-       (load load-file 'noerror 'nomessage))
-     ert-runner-load-files)
+    (-map 'ert-runner--load ert-runner-load-files)
     (if (f-exists? test-helper)
-        (load test-helper 'noerror 'nomessage))
-    (-map
-     (lambda (test-file)
-       (load test-file 'noerror 'nomessage))
-     test-files)
+        (ert-runner--load test-helper))
+    (-map 'ert-runner--load test-files)
     (ert-run-tests-batch-and-exit ert-runner-selector)))
 
 (defun ert-runner/init (&optional name)
