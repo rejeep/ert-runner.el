@@ -90,10 +90,13 @@
 
 (commander
  (name "ert-runner")
+
  (default "help")
+
  (option "--help, -h" "Show usage information" 'ert-runner/usage)
  (option "-p <pattern>" "Run tests matching pattern" 'ert-runner/pattern)
  (option "-l <*>" "Load files" 'ert-runner/load)
+
  (command "init [name]" "Create new test project (optional project name)" 'ert-runner/init)
  (command "run [*]" "Run all or specified tests" 'ert-runner/run)
  (command "help" "Show usage information" 'ert-runner/usage))
