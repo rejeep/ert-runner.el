@@ -6,14 +6,11 @@ easier.
 
 ## Installation
 
-Add to your projects `Cask` file:
+Add `ert-runner` to your [Cask](https://github.com/rejeep/cask.el) file:
 
-    (development
-     (depends-on "ert-runner"))
-
-And then install:
-
-    $ cask install
+```lisp
+(depends-on "ert-runner")
+```
 
 ## Usage
 
