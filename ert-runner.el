@@ -70,10 +70,10 @@
          (test-files (f-files (f-expand ert-runner-test-path) el-tests-fn))
          (test-helper
           (f-expand "test-helper.el" ert-runner-test-path)))
-    (-map 'ert-runner--load ert-runner-load-files)
+    (-each ert-runner-load-files #'ert-runner--load)
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))
-    (-map 'ert-runner--load test-files)
+    (-each test-files #'ert-runner--load)
     (ert-run-tests-batch-and-exit ert-runner-selector)))
 
 (defun ert-runner/init (&optional name)
