@@ -89,6 +89,7 @@
 
 (commander
  (name "ert-runner")
+ (description "Opinionated Ert testing workflow")
 
  (default "help")
 
