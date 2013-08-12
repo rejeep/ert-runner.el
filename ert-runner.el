@@ -52,7 +52,8 @@
   (setq ert-runner-load-files load-files))
 
 (defun ert-runner/usage ()
-  (commander-print-usage))
+  (commander-print-usage)
+  (kill-emacs 1))
 
 (defun ert-runner--load (file)
   (if (f-relative? file)
