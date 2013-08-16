@@ -24,28 +24,28 @@ Create new test directory and files:
 
 Run all tests:
 
-    $ cask exec ert-runner run
+    $ cask exec ert-runner
 
 Run specific tests:
 
-    $ cask exec ert-runner run test/foo-test.el test/bar-test.el
+    $ cask exec ert-runner test/foo-test.el test/bar-test.el
 
 Same as above:
 
-    $ cask exec ert-runner run foo-test.el bar-test.el
+    $ cask exec ert-runner foo-test.el bar-test.el
 
 Run test whose name matches a pattern:
 
-    $ cask exec ert-runner run -p pattern
+    $ cask exec ert-runner -p pattern
 
 Load custom files before running tests:
 
-    $ cask exec ert-runner run -l test/custom.el
+    $ cask exec ert-runner -l test/custom.el
 
 Run all tests whose name matches `emacs-23-only` and load `ert.el`
 from vendor since it's not included in Emacs-23:
 
-    $ cask exec ert-runner run -p emacs-23-only -l vendor/ert.el
+    $ cask exec ert-runner -p emacs-23-only -l vendor/ert.el
 
 ## Projects using
 
