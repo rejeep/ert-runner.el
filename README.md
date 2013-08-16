@@ -53,4 +53,5 @@ from vendor since it's not included in Emacs-23:
 * [ecukes.el](https://github.com/rejeep/ecukes)
 * [commander.el](https://github.com/rejeep/commander.el)
 * [ansi.el](https://github.com/rejeep/ansi)
+* [flycheck.el](https://github.com/lunaryorn/flycheck)
 * ...
