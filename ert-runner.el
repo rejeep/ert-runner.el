@@ -7,7 +7,7 @@
 ;; Version: 0.1.0
 ;; Keywords: test
 ;; URL: http://github.com/rejeep/ert-runner.el
-;; Package-Requires: ((s "1.6.1") (dash "1.8.0") (f "0.6.0") (commander "0.2.0") (ansi "0.1.0"))
+;; Package-Requires: ((s "1.6.1") (dash "1.8.0") (f "0.7.0") (commander "0.2.0") (ansi "0.1.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -82,8 +82,8 @@
   (if (f-dir? "test")
       (error (ansi-red "Directory `test` already exists.")))
   (f-mkdir ert-runner-test-path)
-  (f-write (f-join ert-runner-test-path "test-helper.el"))
-  (f-write (f-join ert-runner-test-path (s-concat name "-test.el")))
+  (f-touch (f-join ert-runner-test-path "test-helper.el"))
+  (f-touch (f-join ert-runner-test-path (s-concat name "-test.el")))
   (message "create %s" (ansi-green (f-filename ert-runner-test-path)))
   (message "create  %s" (ansi-green "test-helper.el"))
   (message "create  %s" (ansi-green (s-concat name "-test.el"))))
