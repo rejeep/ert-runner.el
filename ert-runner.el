@@ -91,6 +91,7 @@
 (commander
  (name "ert-runner")
  (description "Opinionated Ert testing workflow")
+ (config ".ert-runner")
 
  (default ert-runner/run)
 
