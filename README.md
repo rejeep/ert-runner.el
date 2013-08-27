@@ -47,6 +47,15 @@ from vendor since it's not included in Emacs-23:
 
     $ cask exec ert-runner -p emacs-23-only -l vendor/ert.el
 
+## Configuration
+
+You can add a `.ert-runner` file (one option per row) with options you
+always want to include, for example:
+
+```
+-l test/ert-loader.el
+```
+
 ## Projects using
 
 * [f.el](https://github.com/rejeep/f.el)
