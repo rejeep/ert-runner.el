@@ -96,8 +96,8 @@
  (default ert-runner/run)
 
  (option "--help, -h" "Show usage information" ert-runner/usage)
- (option "-p <pattern>" "Run tests matching pattern" ert-runner/pattern)
  (option "-l <*>" "Load files" ert-runner/load)
+ (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
 
  (command "init [name]" "Create new test project (optional project name)" ert-runner/init)
  (command "help" "Show usage information" ert-runner/usage))
