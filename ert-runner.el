@@ -58,7 +58,7 @@
 (defun ert-runner--load (file)
   (if (f-relative? file)
       (setq file (f-expand file)))
-  (load file nil 'nomessage))
+  (load file nil :nomessage))
 
 (defun ert-runner/run (&rest tests)
   (unless (f-dir? ert-runner-test-path)
