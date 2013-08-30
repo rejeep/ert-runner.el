@@ -88,6 +88,10 @@
   (message "create  %s" (ansi-green "test-helper.el"))
   (message "create  %s" (ansi-green (s-concat name "-test.el"))))
 
+(defun ert-runner/debug ()
+  (setq debug-on-error t)
+  (setq debug-on-entry t))
+
 (commander
  (name "ert-runner")
  (description "Opinionated Ert testing workflow")
@@ -98,6 +102,7 @@
  (option "--help, -h" "Show usage information" ert-runner/usage)
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
+ (option "--debug" "Enable debug" ert-runner/debug)
 
  (command "init [name]" "Create new test project (optional project name)" ert-runner/init)
  (command "help" "Show usage information" ert-runner/usage))
