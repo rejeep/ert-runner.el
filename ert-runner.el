@@ -30,6 +30,8 @@
 
 ;;; Code:
 
+(remove-hook 'find-file-hooks 'vc-find-file-hook)
+
 (require 's)
 (require 'dash)
 (require 'f)
