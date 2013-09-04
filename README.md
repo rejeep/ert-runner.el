@@ -46,6 +46,10 @@ Run all tests whose name matches `emacs-23-only` and load `ert.el`
 from vendor since it's not included in Emacs-23:
 
     $ cask exec ert-runner -p emacs-23-only -l vendor/ert.el
+    
+Run in "no win" mode:
+
+    $ cask exec ert-runner --no-win
 
 ## Configuration
 

@@ -47,6 +47,26 @@
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
 
+(defconst ert-runner-output-file (getenv "ERT_RUNNER_OUTFILE")
+  "Path to outfile used for writing when non script mode.")
+
+(defun ert-runner-write (string)
+  (let ((content (f-read-text ert-runner-output-file 'utf-8)))
+    (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file)))
+
+(defadvice princ (after princ-after)
+  (ert-runner-write (car (ad-get-args 0))))
+
+(defadvice message (after message-after)
+  (ert-runner-write (s-concat (apply 'format (ad-get-args 0)) "\n")))
+
+(when ert-runner-output-file
+  (when (f-file? ert-runner-output-file)
+    (f-delete ert-runner-output-file))
+  (f-touch ert-runner-output-file)
+  (ad-activate 'princ)
+  (ad-activate 'message))
+
 (defun ert-runner/pattern (pattern)
   (setq ert-runner-selector pattern))
 
@@ -93,6 +113,8 @@
   (setq debug-on-error t)
   (setq debug-on-entry t))
 
+(setq commander-args (s-split " " (getenv "ERT_RUNNER_ARGS")))
+
 (commander
  (name "ert-runner")
  (description "Opinionated Ert testing workflow")
@@ -104,6 +126,10 @@
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
  (option "--debug" "Enable debug" ert-runner/debug)
+
+ (option "--script" "Run Emacs as a script/batch job (default)" ignore)
+ (option "--no-win" "Run Emacs without GUI window" ignore)
+ (option "--win" "Run Emacs with full GUI window" ignore)
 
  (command "init [name]" "Create new test project (optional project name)" ert-runner/init)
  (command "help" "Show usage information" ert-runner/usage))
