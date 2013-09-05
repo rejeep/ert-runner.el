@@ -113,7 +113,7 @@
   (setq debug-on-error t)
   (setq debug-on-entry t))
 
-(setq commander-args (s-split " " (getenv "ERT_RUNNER_ARGS")))
+(setq commander-args (-reject 's-blank? (s-split " " (getenv "ERT_RUNNER_ARGS"))))
 
 (commander
  (name "ert-runner")
