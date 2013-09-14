@@ -1,4 +1,4 @@
-# ert-runner.el
+# ert-runner.el [![Build Status](https://api.travis-ci.org/rejeep/ert-runner.el.png?branch=master)](http://travis-ci.org/rejeep/ert-runner.el)
 
 Ert-runner is a tool for Emacs projects tested using Ert. It assumes a
 certain test structure setup and can therefore make running tests
@@ -68,3 +68,17 @@ always want to include, for example:
 * [ansi.el](https://github.com/rejeep/ansi)
 * [flycheck.el](https://github.com/flycheck/flycheck)
 * ...
+
+## Contribution
+
+Contribution is much welcome!
+
+Install [cask](https://github.com/cask/cask) if you haven't
+already, then:
+
+    $ cd /path/to/ert-runner.el
+    $ cask
+
+Run all tests with:
+
+    $ make
