@@ -50,22 +50,21 @@
 (defconst ert-runner-output-file (getenv "ERT_RUNNER_OUTFILE")
   "Path to outfile used for writing when non script mode.")
 
-(defun ert-runner-write (string)
-  (let ((content (f-read-text ert-runner-output-file 'utf-8)))
-    (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file)))
+(defun ert-runner-print (string)
+  (when ert-runner-output-file
+    (let ((content (f-read-text ert-runner-output-file 'utf-8)))
+      (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
 
-(defadvice princ (after princ-after)
-  (ert-runner-write (car (ad-get-args 0))))
+(defadvice princ (after princ-after activate)
+  (ert-runner-print (car (ad-get-args 0))))
 
-(defadvice message (after message-after)
-  (ert-runner-write (s-concat (apply 'format (ad-get-args 0)) "\n")))
+(defadvice message (after message-after activate)
+  (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n")))
 
 (when ert-runner-output-file
   (when (f-file? ert-runner-output-file)
     (f-delete ert-runner-output-file))
-  (f-touch ert-runner-output-file)
-  (ad-activate 'princ)
-  (ad-activate 'message))
+  (f-touch ert-runner-output-file))
 
 (defun ert-runner/pattern (pattern)
   (setq ert-runner-selector pattern))
