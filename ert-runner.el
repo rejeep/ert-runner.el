@@ -56,10 +56,12 @@
       (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
 
 (defadvice princ (after princ-after activate)
-  (ert-runner-print (car (ad-get-args 0))))
+  (-when-let (object (car (ad-get-args 0)))
+    (ert-runner-print object)))
 
 (defadvice message (after message-after activate)
-  (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n")))
+  (when (car (ad-get-args 0))
+    (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
 (when ert-runner-output-file
   (when (f-file? ert-runner-output-file)
