@@ -15,6 +15,9 @@
 (defvar ert-runner-project-test-path
   (f-expand "test" ert-runner-project-root-path))
 
+(defvar ert-runner-bin-path
+  (f-join ert-runner-root-path "bin" "ert-runner"))
+
 (defvar ert-runner-output "")
 (defvar ert-runner-error "")
 

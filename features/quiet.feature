@@ -5,7 +5,7 @@ Feature: Quiet option
       """
       (ert-deftest foo-test () (message "Funny output"))
       """
-    And I run cask exec "ert-runner --verbose"
+    And I run cask exec "{ERT-RUNNER} --verbose"
     Then I should see output:
       """
       Funny output
@@ -16,5 +16,5 @@ Feature: Quiet option
       """
       (ert-deftest foo-test () (message "Funny output"))
       """
-    And I run cask exec "ert-runner --quiet"
+    And I run cask exec "{ERT-RUNNER} --quiet"
     Then I should not see output "Funny output"

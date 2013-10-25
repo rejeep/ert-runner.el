@@ -6,7 +6,7 @@ Feature: Test Reporter
       (ert-deftest foo-test ())
       (ert-deftest bar-test ())
       """
-    And I run cask exec "ert-runner --reporter ert"
+    And I run cask exec "{ERT-RUNNER} --reporter ert"
     Then I should see output:
       """
          passed  1/2  bar-test
@@ -18,8 +18,8 @@ Feature: Test Reporter
       """
       (ert-deftest foo-test () (should nil))
       """
-    And I run cask exec "ert-runner --reporter ert"
     Then I should see output:
+    And I run cask exec "{ERT-RUNNER} --reporter ert"
       """
       Test foo-test backtrace:
       """
@@ -51,7 +51,7 @@ Feature: Test Reporter
       (ert-deftest foo-test ())
       (ert-deftest bar-test ())
       """
-    And I run cask exec "ert-runner --reporter dot"
+    And I run cask exec "{ERT-RUNNER} --reporter dot"
     Then I should see output:
       """
       ..
@@ -64,8 +64,8 @@ Feature: Test Reporter
       """
       (ert-deftest foo-test () (should nil))
       """
-    And I run cask exec "ert-runner --reporter ert"
     Then I should see output:
+    And I run cask exec "{ERT-RUNNER} --reporter dot"
       """
       F
 
