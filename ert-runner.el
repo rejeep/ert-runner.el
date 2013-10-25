@@ -47,7 +47,8 @@
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
 
-(defconst ert-runner-output-file (getenv "ERT_RUNNER_OUTFILE")
+(defconst ert-runner-output-file (-when-let (env (getenv "ERT_RUNNER_OUTFILE"))
+                                   (f-expand env))
   "Path to outfile used for writing when non script mode.")
 
 (defun ert-runner-print (string)
