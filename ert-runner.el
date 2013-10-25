@@ -47,19 +47,32 @@
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
 
+(defvar ert-runner-quiet nil
+  "Produce less output.")
+
 (defconst ert-runner-output-file (getenv "ERT_RUNNER_OUTFILE")
   "Path to outfile used for writing when non script mode.")
 
+(defvar ert-runner-output-buffer nil)
+
 (defun ert-runner-print (string)
+  (when ert-runner-output-buffer
+    (with-current-buffer (get-buffer-create ert-runner-output-buffer)
+      (goto-char (point-max))
+      (insert (format "%s" string))))
   (when ert-runner-output-file
     (let ((content (f-read-text ert-runner-output-file 'utf-8)))
       (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
 
-(defadvice princ (after princ-after activate)
+(defadvice princ (around princ-around activate)
+  (when (not ert-runner-quiet)
+    ad-do-it)
   (-when-let (object (car (ad-get-args 0)))
     (ert-runner-print object)))
 
-(defadvice message (after message-after activate)
+(defadvice message (around message-around activate)
+  (when (not ert-runner-quiet)
+    ad-do-it)
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
@@ -97,7 +110,31 @@
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))
     (-each test-files #'ert-runner--load)
-    (ert-run-tests-batch-and-exit ert-runner-selector)))
+    (if ert-runner-quiet
+        (ert-runner-run-tests-batch-and-exit ert-runner-selector)
+      (ert-run-tests-batch-and-exit ert-runner-selector))))
+
+(defun ert-runner-run-tests-batch-and-exit (selector)
+  "Like `ert-run-tests-batch-and-exit', but shows messages on failure."
+  (let* ((start (current-time))
+         (stats (ert-run-tests-batch ert-runner-selector))
+         (end (current-time)))
+    (if (zerop (ert-stats-completed-unexpected stats))
+        (let ((ert-runner-quiet nil))
+          (message "Ran %s test%s in %.3f seconds"
+                   (ert-stats-total stats)
+                   (if (= (ert-stats-total stats) 1)
+                       ""
+                     "s")
+                   (time-to-seconds (time-subtract end start)))
+          (kill-emacs 0))
+      (when ert-runner-output-buffer
+        (with-current-buffer (get-buffer-create ert-runner-output-buffer)
+          (let ((ert-runner-quiet nil))
+            (princ (buffer-string)))))
+      (kill-emacs 1)))
+
+  )
 
 (defun ert-runner/init (&optional name)
   (unless name (setq name (f-filename default-directory)))
@@ -113,6 +150,10 @@
 (defun ert-runner/debug ()
   (setq debug-on-error t)
   (setq debug-on-entry t))
+
+(defun ert-runner/quiet ()
+  (setq ert-runner-quiet t
+        ert-runner-output-buffer "*ert output*"))
 
 (setq commander-args (-reject 's-blank? (s-split " " (getenv "ERT_RUNNER_ARGS"))))
 
@@ -131,6 +172,7 @@
  (option "--script" "Run Emacs as a script/batch job (default)" ignore)
  (option "--no-win" "Run Emacs without GUI window" ignore)
  (option "--win" "Run Emacs with full GUI window" ignore)
+ (option "--quiet, -q" "Produce less output" ert-runner/quiet)
 
  (command "init [name]" "Create new test project (optional project name)" ert-runner/init)
  (command "help" "Show usage information" ert-runner/usage))
