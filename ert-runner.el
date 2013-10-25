@@ -32,6 +32,7 @@
 
 (remove-hook 'find-file-hooks 'vc-find-file-hook)
 
+(require 'cl-lib)
 (require 's)
 (require 'dash)
 (require 'f)
@@ -46,6 +47,33 @@
 
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
+
+(defvar ert-runner-reporter-name "ert"
+  "The reporter to use.")
+
+(defvar ert-runner-reporter-run-started-functions nil
+  "Functions run when a test run starts, before any test is run.
+
+Arguments: stats")
+
+(defvar ert-runner-reporter-run-ended-functions nil
+  "Functions run after all tests have run.
+
+Arguments: stats, abortedp")
+
+(defvar ert-runner-reporter-test-started-functions nil
+  "Functions run before every test.
+
+Arguments: stats, test")
+
+(defvar ert-runner-reporter-test-ended-functions nil
+  "Functions run after each test.
+
+Arguments: stats, test, result")
+
+(defconst ert-runner-reporters-path
+  (f-expand "reporters" (f-dirname (f-this-file)))
+  "Path to directors directory.")
 
 (defconst ert-runner-output-file (-when-let (env (getenv "ERT_RUNNER_OUTFILE"))
                                    (f-expand env))
@@ -86,6 +114,7 @@
 (defun ert-runner/run (&rest tests)
   (unless (f-dir? ert-runner-test-path)
     (error (ansi-red "No test directory. Create one using `ert-runner init`")))
+  (ert-runner/use-reporter ert-runner-reporter-name)
   (let* ((el-tests-fn
           (lambda (file)
             (if tests
@@ -98,7 +127,7 @@
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))
     (-each test-files #'ert-runner--load)
-    (ert-run-tests-batch-and-exit ert-runner-selector)))
+    (ert-runner/run-tests-batch-and-exit ert-runner-selector)))
 
 (defun ert-runner/init (&optional name)
   (unless name (setq name (f-filename default-directory)))
@@ -115,6 +144,52 @@
   (setq debug-on-error t)
   (setq debug-on-entry t))
 
+(defun ert-runner/set-reporter (name)
+  (setq ert-runner-reporter-name name))
+
+(defun ert-runner/use-reporter (name)
+  (let ((reporter-lib-name (format "ert-runner-reporter-%s" name)))
+    (when (not (require (intern reporter-lib-name)
+                        (f-expand reporter-lib-name
+                                  ert-runner-reporters-path)
+                        t))
+      (error (ansi-red (format "Invalid reporter: %s" name))))))
+
+(defun ert-runner/run-tests-batch-and-exit (selector)
+  "Run tests in SELECTOR and exit Emacs."
+  (unwind-protect
+      (let ((stats (ert-runner/run-tests-batch selector)))
+        (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1)))
+    (unwind-protect
+        (progn
+          (message "Error running tests")
+          (backtrace))
+      (kill-emacs 2))))
+
+(defun ert-runner/run-tests-batch (selector)
+  "Run tests in SELECTOR, calling reporters for updates."
+  (unless selector (setq selector 't))
+  (ert-run-tests
+   selector
+   (lambda (event-type &rest event-args)
+     (cl-ecase event-type
+       (run-started
+        (cl-destructuring-bind (stats) event-args
+          (run-hook-with-args 'ert-runner-reporter-run-started-functions
+                              stats)))
+       (run-ended
+        (cl-destructuring-bind (stats abortedp) event-args
+          (run-hook-with-args 'ert-runner-reporter-run-ended-functions
+                              stats abortedp)))
+       (test-started
+        (cl-destructuring-bind (stats test) event-args
+          (run-hook-with-args 'ert-runner-reporter-test-started-functions
+                              stats test)))
+       (test-ended
+        (cl-destructuring-bind (stats test result) event-args
+          (run-hook-with-args 'ert-runner-reporter-test-ended-functions
+                              stats test result)))))))
+
 (setq commander-args (-reject 's-blank? (s-split " " (getenv "ERT_RUNNER_ARGS"))))
 
 (commander
@@ -128,6 +203,8 @@
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
  (option "--debug" "Enable debug" ert-runner/debug)
+ (option "--reporter <name>" "Set the reporter (default: ert)"
+         ert-runner/set-reporter)
 
  (option "--script" "Run Emacs as a script/batch job (default)" ignore)
  (option "--no-win" "Run Emacs without GUI window" ignore)
