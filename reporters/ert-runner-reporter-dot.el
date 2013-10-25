@@ -11,11 +11,9 @@
 ;;; License:
 
 ;; This program is free software; you can redistribute it and/or
-;; modify
-;; it under the terms of the GNU General Public License as published
-;; by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 3, or (at
+;; your option) any later version.
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,32 +40,35 @@
           (lambda (stats abortedp)
             (let ((unexpected (ert-stats-completed-unexpected stats))
                   (expected-failures (ert--stats-failed-expected stats)))
-              (princ
-               (format "\n\n%sRan %s tests in %.3f seconds%s\n"
-                       (if (not abortedp)
-                           ""
-                         "Aborted: ")
-                       (ert-stats-total stats)
-                       (time-to-seconds
-                        (time-subtract (current-time)
-                                       ert-runner-reporter-dot-start-time))
-                       (if (zerop expected-failures)
-                           ""
-                         (format "\n%s expected failures" expected-failures))))
+              (ert-runner-message "\n\n%sRan %s test%s in %.3f seconds%s\n"
+                                  (if (not abortedp)
+                                      ""
+                                    "Aborted: ")
+                                  (ert-stats-total stats)
+                                  (if (= (ert-stats-total stats) 1)
+                                      ""
+                                    "s")
+                                  (time-to-seconds
+                                   (time-subtract (current-time)
+                                                  ert-runner-reporter-dot-start-time))
+                                  (if (zerop expected-failures)
+                                      ""
+                                    (format "\n%s expected failures" expected-failures)))
               (unless (zerop unexpected)
-                (princ (format "%s unexpected results:\n" unexpected))
+                (ert-runner-message "%s unexpected results:\n" unexpected)
                 (cl-loop for test across (ert--stats-tests stats)
                          for result = (ert-test-most-recent-result test) do
                          (when (not (ert-test-result-expected-p test result))
-                           (princ (format "%9s  %S\n"
-                                          (ert-string-for-test-result result nil)
-                                          (ert-test-name test)))))))))
+                           (ert-runner-message "%9s  %S\n"
+                                               (ert-string-for-test-result
+                                                result nil)
+                                               (ert-test-name test))))))))
 
 (add-hook 'ert-runner-reporter-test-ended-functions
           (lambda (stats test result)
             (if (ert-test-result-expected-p test result)
-                (princ ".")
-              (princ "F"))))
+                (ert-runner-message ".")
+              (ert-runner-message "F"))))
 
 (provide 'ert-runner-reporter-dot)
 ;;; ert-runnert-reporter-dot.el ends here

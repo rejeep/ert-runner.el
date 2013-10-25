@@ -48,6 +48,18 @@
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
 
+(defvar ert-runner-verbose t
+  "If true, show all message output, otherwise hide.")
+
+(defvar ert-runner-bypass-output-filter nil
+  "Dynamic variable to bypass output filters.
+
+Don't set this directly, bind it with a `let' before calling `princ'.")
+
+(defvar ert-runner-output-buffer "*ert-runner outout*"
+  "The buffer in which test output is stored in case it is
+needed by a reporter later.")
+
 (defvar ert-runner-reporter-name "ert"
   "The reporter to use.")
 
@@ -79,23 +91,53 @@ Arguments: stats, test, result")
                                    (f-expand env))
   "Path to outfile used for writing when non script mode.")
 
-(defun ert-runner-print (string)
-  (when ert-runner-output-file
-    (let ((content (f-read-text ert-runner-output-file 'utf-8)))
-      (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
-
-(defadvice princ (after princ-after activate)
-  (-when-let (object (car (ad-get-args 0)))
-    (ert-runner-print object)))
-
-(defadvice message (after message-after activate)
-  (when (car (ad-get-args 0))
-    (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
-
 (when ert-runner-output-file
   (when (f-file? ert-runner-output-file)
     (f-delete ert-runner-output-file))
   (f-touch ert-runner-output-file))
+
+(defun ert-runner-print (string)
+  "Display STRING.
+
+This is the basic message output function of ert-runner, used by
+the runner itself, reporters, and also hooked into other Emacs
+output.
+
+If `ert-runner-verbose', this output is emitted to stdout.
+
+Output is stored in `ert-runner-output-buffer' so we can show it
+when a test fails.
+
+When `ert-runner-output-file' is set, all output goes to that
+file as well."
+  (if ert-runner-verbose
+      (let ((ert-runner-bypass-output-filter t))
+        (princ string))
+    (with-current-buffer (get-buffer-create ert-runner-output-buffer)
+      (insert string)))
+  (when ert-runner-output-file
+    (let ((content (f-read-text ert-runner-output-file 'utf-8)))
+      (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
+
+(defun ert-runner-message (format &rest args)
+  "Emit a formatted message.
+
+This bypasses the normal output capturing ert-runner does, and is
+primarily intended for reporters."
+  (let ((ert-runner-verbose t))
+    (ert-runner-print (apply #'format format args))))
+
+(defadvice princ (around princ-around activate)
+  (let ((printcharfun (cadr (ad-get-args 0))))
+    (if (or ert-runner-bypass-output-filter
+            (not (memq printcharfun '(t nil))))
+        ad-do-it
+      (-when-let (object (car (ad-get-args 0)))
+        (ert-runner-print object)))))
+
+(defadvice message (around message-around activate)
+  (when (car (ad-get-args 0))
+    (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
 (defun ert-runner/pattern (pattern)
   (setq ert-runner-selector pattern))
@@ -144,6 +186,12 @@ Arguments: stats, test, result")
   (setq debug-on-error t)
   (setq debug-on-entry t))
 
+(defun ert-runner/verbose ()
+  (setq ert-runner-verbose t))
+
+(defun ert-runner/quiet ()
+  (setq ert-runner-verbose nil))
+
 (defun ert-runner/set-reporter (name)
   (setq ert-runner-reporter-name name))
 
@@ -157,14 +205,15 @@ Arguments: stats, test, result")
 
 (defun ert-runner/run-tests-batch-and-exit (selector)
   "Run tests in SELECTOR and exit Emacs."
-  (unwind-protect
-      (let ((stats (ert-runner/run-tests-batch selector)))
-        (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1)))
-    (unwind-protect
-        (progn
-          (message "Error running tests")
-          (backtrace))
-      (kill-emacs 2))))
+  ;; unwind-protect
+  (let ((stats (ert-runner/run-tests-batch selector)))
+    (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1)))
+  ;; (unwind-protect
+  ;;     (progn
+  ;;       (message "Error running tests")
+  ;;       (backtrace))
+  ;;   (kill-emacs 2))
+  )
 
 (defun ert-runner/run-tests-batch (selector)
   "Run tests in SELECTOR, calling reporters for updates."
@@ -182,11 +231,58 @@ Arguments: stats, test, result")
           (run-hook-with-args 'ert-runner-reporter-run-ended-functions
                               stats abortedp)))
        (test-started
+        (with-current-buffer (get-buffer-create ert-runner-output-buffer)
+          (erase-buffer))
         (cl-destructuring-bind (stats test) event-args
           (run-hook-with-args 'ert-runner-reporter-test-started-functions
                               stats test)))
        (test-ended
         (cl-destructuring-bind (stats test result) event-args
+          (unless (ert-test-result-expected-p test result)
+            (cl-etypecase result
+              (ert-test-passed
+               (ert-runner-message "Test %S passed unexpectedly\n"
+                                   (ert-test-name test)))
+              (ert-test-result-with-condition
+               (ert-runner-message "Test %S backtrace:\n\n"
+                                   (ert-test-name test))
+               (with-temp-buffer
+                 (ert--print-backtrace
+                  (ert-test-result-with-condition-backtrace
+                   result))
+                 (goto-char (point-min))
+                 (while (not (eobp))
+                   (let ((start (point))
+                         (end (progn (end-of-line) (point))))
+                     (setq end (min end
+                                    (+ start
+                                       ert-batch-backtrace-right-margin)))
+                     (ert-runner-message "%s\n" (buffer-substring-no-properties
+                                                 start end)))
+                   (forward-line 1))
+                 (ert-runner-message "\n"))
+               (with-temp-buffer
+                 (ert--insert-infos result)
+                 (insert "    ")
+                 (let ((print-escape-newlines t)
+                       (print-level 5)
+                       (print-length 10))
+                   (ert--pp-with-indentation-and-newline
+                    (ert-test-result-with-condition-condition result)))
+                 (ert-runner-message "Test %S condition:\n\n"
+                                     (ert-test-name test))
+                 (ert-runner-message "%s\n" (buffer-string))))
+              (ert-test-aborted-with-non-local-exit
+               (ert-runner-message "Test %S aborted with non-local exit\n"
+                                   (ert-test-name test)))
+              (ert-test-quit
+               (ert-runner-message "Quit during %S\n" (ert-test-name test))))
+            (with-current-buffer (get-buffer-create ert-runner-output-buffer)
+              (when (not (= (point-min) (point-max)))
+                (ert-runner-message "Test %S output:\n\n"
+                                    (ert-test-name test))
+                (ert-runner-message "%s" (buffer-string))
+                (ert-runner-message "\n"))))
           (run-hook-with-args 'ert-runner-reporter-test-ended-functions
                               stats test result)))))))
 
@@ -203,6 +299,8 @@ Arguments: stats, test, result")
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
  (option "--debug" "Enable debug" ert-runner/debug)
+ (option "--quiet" "Do not show package output" ert-runner/quiet)
+ (option "--verbose" "Show package output" ert-runner/verbose)
  (option "--reporter <name>" "Set the reporter (default: ert)"
          ert-runner/set-reporter)
 
