@@ -88,14 +88,6 @@ Feature: Test Reporter
            ((should nil)
             :form nil :value nil))
       """
-    And I should see output:
-      """
-         FAILED  1/1  foo-test
-      """
-    And I should see output:
-      """
-      Ran 1 tests, 0 results as expected, 1 unexpected
-      """
     And I should see error:
       """
       1 unexpected results:
