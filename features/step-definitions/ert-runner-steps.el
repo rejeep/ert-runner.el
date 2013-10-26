@@ -4,6 +4,7 @@
 
 (When "^I run cask exec \"\\([^\"]+\\)\"$"
   (lambda (command)
+    (setq command (s-replace "{ERT-RUNNER}" ert-runner-bin-path command))
     (let* ((buffer-name "*ert-runner-output*")
            (buffer
             (progn
