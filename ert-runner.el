@@ -38,6 +38,7 @@
 (require 'f)
 (require 'commander)
 (require 'ansi)
+(require 'ert)
 
 (defvar ert-runner-selector t
   "Selector that Ert should run with.")
@@ -50,11 +51,6 @@
 
 (defvar ert-runner-verbose t
   "If true, show all message output, otherwise hide.")
-
-(defvar ert-runner-bypass-output-filter nil
-  "Dynamic variable to bypass output filters.
-
-Don't set this directly, bind it with a `let' before calling `princ'.")
 
 (defvar ert-runner-output-buffer "*ert-runner outout*"
   "The buffer in which test output is stored in case it is
@@ -110,9 +106,7 @@ when a test fails.
 
 When `ert-runner-output-file' is set, all output goes to that
 file as well."
-  (if ert-runner-verbose
-      (let ((ert-runner-bypass-output-filter t))
-        (princ string))
+  (when (not ert-runner-verbose)
     (with-current-buffer (get-buffer-create ert-runner-output-buffer)
       (insert string)))
   (when ert-runner-output-file
@@ -125,17 +119,25 @@ file as well."
 This bypasses the normal output capturing ert-runner does, and is
 primarily intended for reporters."
   (let ((ert-runner-verbose t))
-    (ert-runner-print (apply #'format format args))))
+    (princ (apply #'format format args))))
 
 (defadvice princ (around princ-around activate)
-  (let ((printcharfun (cadr (ad-get-args 0))))
-    (if (or ert-runner-bypass-output-filter
-            (not (memq printcharfun '(t nil))))
-        ad-do-it
-      (-when-let (object (car (ad-get-args 0)))
-        (ert-runner-print object)))))
+  (cond
+   ;; Verbose: Print and log to output buffer
+   (ert-runner-verbose
+    ad-do-it
+    (ert-runner-print (car (ad-get-args 0))))
+   ;; Output doesn't go to stdout, just print
+   ((not (memq (cadr (ad-get-args 0))
+               '(t nil)))
+    ad-do-it)
+   ;; Quiet
+   (t
+    (ert-runner-print (car (ad-get-args 0))))))
 
 (defadvice message (around message-around activate)
+  (when ert-runner-verbose
+    ad-do-it)
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
@@ -190,7 +192,8 @@ primarily intended for reporters."
   (setq ert-runner-verbose t))
 
 (defun ert-runner/quiet ()
-  (setq ert-runner-verbose nil))
+  (when noninteractive
+    (setq ert-runner-verbose nil)))
 
 (defun ert-runner/set-reporter (name)
   (setq ert-runner-reporter-name name))
@@ -205,15 +208,8 @@ primarily intended for reporters."
 
 (defun ert-runner/run-tests-batch-and-exit (selector)
   "Run tests in SELECTOR and exit Emacs."
-  ;; unwind-protect
   (let ((stats (ert-runner/run-tests-batch selector)))
-    (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1)))
-  ;; (unwind-protect
-  ;;     (progn
-  ;;       (message "Error running tests")
-  ;;       (backtrace))
-  ;;   (kill-emacs 2))
-  )
+    (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1))))
 
 (defun ert-runner/run-tests-batch (selector)
   "Run tests in SELECTOR, calling reporters for updates."
