@@ -38,7 +38,7 @@
 (require 'f)
 (require 'commander)
 (require 'ansi)
-(require 'ert)
+(require 'ert nil 'no-error)
 
 (defvar ert-runner-selector t
   "Selector that Ert should run with.")

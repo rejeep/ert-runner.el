@@ -3,7 +3,7 @@
 ;; Most of the code here is taken directly from ert.el's
 ;; `ert-run-tests-batch' function.
 
-(require 'ert)
+(require 'ert nil 'no-error)
 
 (add-hook 'ert-runner-reporter-run-started-functions
           (lambda (stats)
