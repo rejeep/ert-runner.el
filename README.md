@@ -46,6 +46,19 @@ Run all tests whose name matches `emacs-23-only` and load `ert.el`
 from vendor since it's not included in Emacs-23:
 
     $ cask exec ert-runner -p emacs-23-only -l vendor/ert.el
+
+Run all tests which are tagged `emacs-23-only` or `all-emacsen`:
+
+    $ cask exec ert-runner -t emacs-23-only,all-emacsen
+
+Run all tests which are *not* tagged `emacs-24-only`:
+
+    $ cask exec ert-runner -t !emacs-24-only
+
+Run all tests, whose name matches `request`, and which are tagged `fast` or
+`important`, but *not* `network`:
+
+    $ cask exec ert-runner -p request -t fast,important -t !network
     
 Run in "no win" mode:
 

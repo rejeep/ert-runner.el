@@ -40,7 +40,7 @@
 (require 'ansi)
 (require 'ert nil 'no-error)
 
-(defvar ert-runner-selector t
+(defvar ert-runner-selector '(and t)
   "Selector that Ert should run with.")
 
 (defvar ert-runner-load-files nil
@@ -141,8 +141,23 @@ primarily intended for reporters."
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
+(defun ert-runner/add-selector (selector)
+  (add-to-list 'ert-runner-selector selector 'append))
+
+(defun ert-runner/make-tag-selector (tag)
+  (let* ((tag-symbol (intern (s-chop-prefix "!" tag)))
+         (tag-selector `(tag ,tag-symbol)))
+    (if (s-starts-with? "!" tag)
+        `(not ,tag-selector)
+      tag-selector)))
+
+(defun ert-runner/tags (tags)
+  (let* ((tag-list (s-split "," tags 'omit-nulls))
+         (selectors (-map #'ert-runner/make-tag-selector tag-list)))
+    (ert-runner/add-selector `(or ,@selectors))))
+
 (defun ert-runner/pattern (pattern)
-  (setq ert-runner-selector pattern))
+  (ert-runner/add-selector pattern))
 
 (defun ert-runner/load (&rest load-files)
   (setq ert-runner-load-files load-files))
@@ -293,6 +308,7 @@ primarily intended for reporters."
 
  (option "--help, -h" "Show usage information" ert-runner/usage)
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
+ (option "--tags <tags>, -t <tags>" "Run tests matching tags" ert-runner/tags)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
  (option "--debug" "Enable debug" ert-runner/debug)
  (option "--quiet" "Do not show package output" ert-runner/quiet)
