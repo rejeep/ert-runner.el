@@ -141,6 +141,27 @@ primarily intended for reporters."
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
+;; Hack around Emacs bug #16121, see
+;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
+
+;; Remember the original definition
+(declare-function ert-runner/ert-select-tests "ert-runner" (selector universe))
+(fset 'ert-runner/ert-select-tests (symbol-function 'ert-select-tests))
+;; And fix handling of string selectors
+(fset 'ert-select-tests
+      (lambda (selector universe)
+        (if (stringp selector)
+            (cl-etypecase universe
+              ((member t) (mapcar #'ert-get-test
+                                  (apropos-internal selector #'ert-test-boundp)))
+              (list (cl-remove-if-not
+                     (lambda (test)
+                       (and (ert-test-name test)
+                            (string-match selector
+                                          (symbol-name (ert-test-name test)))))
+                     universe)))
+          (ert-runner/ert-select-tests selector universe))))
+
 (defun ert-runner/add-selector (selector)
   (add-to-list 'ert-runner-selector selector 'append))
 
