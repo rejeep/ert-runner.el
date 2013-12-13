@@ -39,3 +39,20 @@
 (Then "^\\(?:I should not see error:\\|I should not see error \"\\(.+\\)\"\\)$"
   (lambda (expected)
     (should-not (s-contains? expected ert-runner-error))))
+
+(Then "^I should see test output:$"
+  (lambda (table)
+    (let* ((head (car table))
+           (rows (cdr table))
+           (name-index (-elem-index "name" head))
+           (success-index (-elem-index "success" head)))
+      (-each
+       rows
+       (lambda (row)
+         (let ((name (nth name-index row))
+               (success (read (nth success-index row))))
+           (let* ((passed (format "passed  [0-9]+\/[0-9]+  %s" name))
+                  (match (s-matches? passed ert-runner-output)))
+             (if success
+                 (should match)
+               (should-not match)))))))))

@@ -40,7 +40,7 @@
 (require 'ansi)
 (require 'ert nil 'no-error)
 
-(defvar ert-runner-selector t
+(defvar ert-runner-selector '(and t)
   "Selector that Ert should run with.")
 
 (defvar ert-runner-load-files nil
@@ -141,8 +141,44 @@ primarily intended for reporters."
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
+;; Hack around Emacs bug #16121, see
+;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
+
+;; Remember the original definition
+(declare-function ert-runner/ert-select-tests "ert-runner" (selector universe))
+(fset 'ert-runner/ert-select-tests (symbol-function 'ert-select-tests))
+;; And fix handling of string selectors
+(fset 'ert-select-tests
+      (lambda (selector universe)
+        (if (stringp selector)
+            (cl-etypecase universe
+              ((member t) (mapcar #'ert-get-test
+                                  (apropos-internal selector #'ert-test-boundp)))
+              (list (cl-remove-if-not
+                     (lambda (test)
+                       (and (ert-test-name test)
+                            (string-match selector
+                                          (symbol-name (ert-test-name test)))))
+                     universe)))
+          (ert-runner/ert-select-tests selector universe))))
+
+(defun ert-runner/add-selector (selector)
+  (add-to-list 'ert-runner-selector selector 'append))
+
+(defun ert-runner/make-tag-selector (tag)
+  (let* ((tag-symbol (intern (s-chop-prefix "!" tag)))
+         (tag-selector `(tag ,tag-symbol)))
+    (if (s-starts-with? "!" tag)
+        `(not ,tag-selector)
+      tag-selector)))
+
+(defun ert-runner/tags (tags)
+  (let* ((tag-list (s-split "," tags 'omit-nulls))
+         (selectors (-map #'ert-runner/make-tag-selector tag-list)))
+    (ert-runner/add-selector `(or ,@selectors))))
+
 (defun ert-runner/pattern (pattern)
-  (setq ert-runner-selector pattern))
+  (ert-runner/add-selector pattern))
 
 (defun ert-runner/load (&rest load-files)
   (setq ert-runner-load-files load-files))
@@ -293,6 +329,7 @@ primarily intended for reporters."
 
  (option "--help, -h" "Show usage information" ert-runner/usage)
  (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
+ (option "--tags <tags>, -t <tags>" "Run tests matching tags" ert-runner/tags)
  (option "--load <*>, -l <*>" "Load files" ert-runner/load)
  (option "--debug" "Enable debug" ert-runner/debug)
  (option "--quiet" "Do not show package output" ert-runner/quiet)

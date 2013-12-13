@@ -17,6 +17,67 @@ Feature: Ert Runner
     And I should not see output "bar-test"
     And I should not see output "baz-test"
 
+  Scenario: Tag filtering
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest this-test () :tags '(bar))
+      (ert-deftest and-this-test () :tags '(foo))
+      (ert-deftest but-not-this ())
+      (ert-deftest and-not-this ())
+      """
+    When I run cask exec "{ERT-RUNNER} foo-test.el --tags foo,bar"
+    Then I should see test output:
+      | name          | success |
+      | this-test     | t       |
+      | and-this-test | t       |
+      | not-this      | nil     |
+
+  Scenario: Negative tag filtering
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest this-test () :tags '(bar))
+      (ert-deftest but-not-this-test () :tags '(foo))
+      (ert-deftest but-this-one ())
+      (ert-deftest and-this-one-too ())
+      """
+    When I run cask exec "{ERT-RUNNER} foo-test.el --tags !foo"
+    Then I should see test output:
+      | name              | success |
+      | this-test         | t       |
+      | but-this-one      | t       |
+      | and-this-one-too  | t       |
+      | but-not-this-test | nil     |
+
+  Scenario: Advanced tag filtering
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest this-test () :tags '(bar))
+      (ert-deftest but-not-this-one ())
+      (ert-deftest and-not-this-test () :tags '(foo))
+      (ert-deftest and-not-this-one () :tags '(bar foo))
+      """
+    When I run cask exec "{ERT-RUNNER} foo-test.el --tags !foo --tags bar"
+    Then I should see output:
+      """
+         passed  1/1  this-test
+      """
+    And I should not see output "not-this"
+
+  Scenario: Advanced tag filtering
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest this-test () :tags '(bar))
+      (ert-deftest but-not-this-one () :tags '(bar))
+      (ert-deftest and-not-this-test () :tags '(foo))
+      (ert-deftest and-not-this-one () :tags '(bar))
+      """
+    When I run cask exec "{ERT-RUNNER} foo-test.el --tags bar --pattern test"
+    Then I should see output:
+      """
+         passed  1/1  this-test
+      """
+    And I should not see output "not-this"
+
   Scenario: Test helper
     When I create a test file called "test-helper.el" with content:
       """
