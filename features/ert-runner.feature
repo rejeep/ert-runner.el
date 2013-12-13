@@ -26,12 +26,11 @@ Feature: Ert Runner
       (ert-deftest and-not-this ())
       """
     When I run cask exec "{ERT-RUNNER} foo-test.el --tags foo,bar"
-    Then I should see output:
-      """
-         passed  1/2  this-test
-         passed  2/2  and-this-test
-      """
-    And I should not see output "not-this"
+    Then I should see test output:
+      | name          | success |
+      | this-test     | t       |
+      | and-this-test | t       |
+      | not-this      | nil     |
 
   Scenario: Negative tag filtering
     When I create a test file called "foo-test.el" with content:
@@ -42,13 +41,12 @@ Feature: Ert Runner
       (ert-deftest and-this-one-too ())
       """
     When I run cask exec "{ERT-RUNNER} foo-test.el --tags !foo"
-    Then I should see output:
-      """
-         passed  1/3  this-test
-         passed  2/3  but-this-one
-         passed  3/3  and-this-one-too
-      """
-    And I should not see output "but-not-this-test"
+    Then I should see test output:
+      | name              | success |
+      | this-test         | t       |
+      | but-this-one      | t       |
+      | and-this-one-too  | t       |
+      | but-not-this-test | nil     |
 
   Scenario: Advanced tag filtering
     When I create a test file called "foo-test.el" with content:
