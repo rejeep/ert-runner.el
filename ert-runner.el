@@ -38,7 +38,9 @@
 (require 'f)
 (require 'commander)
 (require 'ansi)
-(require 'ert nil 'no-error)
+(eval-and-compile
+  (unless (require 'ert nil 'no-error)
+    (load "ert-compat" nil 'no-message)))
 
 (defvar ert-runner-selector '(and t)
   "Selector that Ert should run with.")
