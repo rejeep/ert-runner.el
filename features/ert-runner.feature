@@ -152,3 +152,22 @@ Feature: Ert Runner
       """
          passed  1/1  foo-test
       """
+
+  Scenario: Load path
+    When I create a test file called "foo-init.el" with content:
+      """
+      (defun foo ())
+
+      (provide 'foo-init)
+      """
+    When I create a test file called "foo-test.el" with content:
+      """
+      (require 'foo-init)
+
+      (ert-deftest foo-test () (foo))
+      """
+    When I run cask exec "{ERT-RUNNER} -L test"
+    Then I should see output:
+      """
+         passed  1/1  foo-test
+      """

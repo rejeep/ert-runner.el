@@ -187,6 +187,10 @@ primarily intended for reporters."
   "Load LOAD-FILES."
   (setq ert-runner-load-files load-files))
 
+(defun ert-runner/load-path (path)
+  "Append PATH to `load-path'."
+  (add-to-list 'load-path path 'append))
+
 (defun ert-runner/usage ()
   "Show usage information."
   (commander-print-usage-and-exit))
@@ -344,6 +348,7 @@ primarily intended for reporters."
  (option "--quiet" ert-runner/quiet)
  (option "--verbose" ert-runner/verbose)
  (option "--reporter <name>" ert-runner/set-reporter)
+ (option "-L <path>" ert-runner/load-path)
 
  (option "--script" "Run Emacs as a script/batch job (default)" ignore)
  (option "--no-win" "Run Emacs without GUI window" ignore)
