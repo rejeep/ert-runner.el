@@ -174,17 +174,21 @@ primarily intended for reporters."
       tag-selector)))
 
 (defun ert-runner/tags (tags)
+  "Run tests matching tags."
   (let* ((tag-list (s-split "," tags 'omit-nulls))
          (selectors (-map #'ert-runner/make-tag-selector tag-list)))
     (ert-runner/add-selector `(or ,@selectors))))
 
 (defun ert-runner/pattern (pattern)
+  "Run tests matching PATTERN."
   (ert-runner/add-selector pattern))
 
 (defun ert-runner/load (&rest load-files)
+  "Load LOAD-FILES."
   (setq ert-runner-load-files load-files))
 
 (defun ert-runner/usage ()
+  "Show usage information."
   (commander-print-usage-and-exit))
 
 (defun ert-runner--load (file)
@@ -211,6 +215,7 @@ primarily intended for reporters."
     (ert-runner/run-tests-batch-and-exit ert-runner-selector)))
 
 (defun ert-runner/init (&optional name)
+  "Create new test project (optional project name)."
   (unless name (setq name (f-filename default-directory)))
   (if (f-dir? "test")
       (error (ansi-red "Directory `test` already exists.")))
@@ -222,17 +227,20 @@ primarily intended for reporters."
   (message "create  %s" (ansi-green (s-concat name "-test.el"))))
 
 (defun ert-runner/debug ()
-  (setq debug-on-error t)
-  (setq debug-on-entry t))
+  "Enable debug."
+  (setq debug-on-error t))
 
 (defun ert-runner/verbose ()
+  "Show package output."
   (setq ert-runner-verbose t))
 
 (defun ert-runner/quiet ()
+  "Do not show package output."
   (when noninteractive
     (setq ert-runner-verbose nil)))
 
 (defun ert-runner/set-reporter (name)
+  "Set the reporter (default: ert)."
   (setq ert-runner-reporter-name name))
 
 (defun ert-runner/use-reporter (name)
@@ -328,21 +336,20 @@ primarily intended for reporters."
 
  (default ert-runner/run)
 
- (option "--help, -h" "Show usage information" ert-runner/usage)
- (option "--pattern <pattern>, -p <pattern>" "Run tests matching pattern" ert-runner/pattern)
- (option "--tags <tags>, -t <tags>" "Run tests matching tags" ert-runner/tags)
- (option "--load <*>, -l <*>" "Load files" ert-runner/load)
- (option "--debug" "Enable debug" ert-runner/debug)
- (option "--quiet" "Do not show package output" ert-runner/quiet)
- (option "--verbose" "Show package output" ert-runner/verbose)
- (option "--reporter <name>" "Set the reporter (default: ert)"
-         ert-runner/set-reporter)
+ (option "--help, -h" ert-runner/usage)
+ (option "--pattern <pattern>, -p <pattern>" ert-runner/pattern)
+ (option "--tags <tags>, -t <tags>" ert-runner/tags)
+ (option "--load <*>, -l <*>" ert-runner/load)
+ (option "--debug" ert-runner/debug)
+ (option "--quiet" ert-runner/quiet)
+ (option "--verbose" ert-runner/verbose)
+ (option "--reporter <name>" ert-runner/set-reporter)
 
  (option "--script" "Run Emacs as a script/batch job (default)" ignore)
  (option "--no-win" "Run Emacs without GUI window" ignore)
  (option "--win" "Run Emacs with full GUI window" ignore)
 
- (command "init [name]" "Create new test project (optional project name)" ert-runner/init)
- (command "help" "Show usage information" ert-runner/usage))
+ (command "init [name]" ert-runner/init)
+ (command "help" ert-runner/usage))
 
 ;;; ert-runner.el ends here
