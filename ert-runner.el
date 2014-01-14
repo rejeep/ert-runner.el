@@ -142,6 +142,11 @@ primarily intended for reporters."
   (when (car (ad-get-args 0))
     (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
 
+(defadvice print (around print-around activate)
+  (when ert-runner-verbose
+    ad-do-it)
+  (ert-runner-print (s-concat (pp-to-string (car (ad-get-args 0))) "\n")))
+
 ;; Hack around Emacs bug #16121, see
 ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
 
