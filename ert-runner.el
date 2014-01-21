@@ -7,7 +7,7 @@
 ;; Version: 0.6.2
 ;; Keywords: test
 ;; URL: http://github.com/rejeep/ert-runner.el
-;; Package-Requires: ((s "1.6.1") (dash "1.8.0") (f "0.10.0") (commander "0.2.0") (ansi "0.1.0") (shut-up "0.0.1"))
+;; Package-Requires: ((s "1.6.1") (dash "1.8.0") (f "0.10.0") (commander "0.2.0") (ansi "0.1.0") (shut-up "0.1.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
