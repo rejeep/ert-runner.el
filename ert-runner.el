@@ -41,6 +41,9 @@
   (unless (require 'ert nil 'no-error)
     (load "ert-compat" nil 'no-message)))
 
+(when noninteractive
+  (shut-up-silence-emacs))
+
 (defvar ert-runner-selector '(and t)
   "Selector that Ert should run with.")
 
