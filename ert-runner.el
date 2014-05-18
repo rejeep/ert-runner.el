@@ -96,59 +96,15 @@ Arguments: stats, test, result")
     (f-delete ert-runner-output-file))
   (f-touch ert-runner-output-file))
 
-(defun ert-runner-print (string)
-  "Display STRING.
-
-This is the basic message output function of ert-runner, used by
-the runner itself, reporters, and also hooked into other Emacs
-output.
-
-If `ert-runner-verbose', this output is emitted to stdout.
-
-Output is stored in `ert-runner-output-buffer' so we can show it
-when a test fails.
-
-When `ert-runner-output-file' is set, all output goes to that
-file as well."
-  (when (not ert-runner-verbose)
-    (with-current-buffer (get-buffer-create ert-runner-output-buffer)
-      (insert string)))
-  (when ert-runner-output-file
-    (let ((content (f-read-text ert-runner-output-file 'utf-8)))
-      (f-write-text (s-concat content string) 'utf-8 ert-runner-output-file))))
-
+;; Retain the original message function for later use
+(fset 'ert-runner/princ-original (symbol-function 'message))
 (defun ert-runner-message (format &rest args)
   "Emit a formatted message.
 
 This bypasses the normal output capturing ert-runner does, and is
 primarily intended for reporters."
-  (let ((ert-runner-verbose t))
-    (princ (apply #'format format args))))
-
-(defadvice princ (around princ-around activate)
-  (cond
-   ;; Verbose: Print and log to output buffer
-   (ert-runner-verbose
-    ad-do-it
-    (ert-runner-print (car (ad-get-args 0))))
-   ;; Output doesn't go to stdout, just print
-   ((not (memq (cadr (ad-get-args 0))
-               '(t nil)))
-    ad-do-it)
-   ;; Quiet
-   (t
-    (ert-runner-print (car (ad-get-args 0))))))
-
-(defadvice message (around message-around activate)
-  (when ert-runner-verbose
-    ad-do-it)
-  (when (car (ad-get-args 0))
-    (ert-runner-print (s-concat (apply 'format (ad-get-args 0)) "\n"))))
-
-(defadvice print (around print-around activate)
-  (when ert-runner-verbose
-    ad-do-it)
-  (ert-runner-print (s-concat (pp-to-string (car (ad-get-args 0))) "\n")))
+  (princ (apply #'format format args)
+         t))
 
 ;; Hack around Emacs bug #16121, see
 ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
@@ -224,7 +180,10 @@ primarily intended for reporters."
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))
     (-each test-files #'ert-runner--load)
-    (ert-runner/run-tests-batch-and-exit ert-runner-selector)))
+    (if ert-runner-verbose
+        (ert-runner/run-tests-batch-and-exit ert-runner-selector)
+      (shut-up
+       (ert-runner/run-tests-batch-and-exit ert-runner-selector)))))
 
 (defun ert-runner/init (&optional name)
   "Create new test project (optional project name)."
