@@ -152,26 +152,27 @@ primarily intended for reporters."
     ad-do-it)
   (ert-runner-print (s-concat (pp-to-string (car (ad-get-args 0))) "\n")))
 
-;; Hack around Emacs bug #16121, see
-;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
-
-;; Remember the original definition
-(declare-function ert-runner/ert-select-tests "ert-runner" (selector universe))
-(fset 'ert-runner/ert-select-tests (symbol-function 'ert-select-tests))
-;; And fix handling of string selectors
-(fset 'ert-select-tests
-      (lambda (selector universe)
-        (if (stringp selector)
-            (cl-etypecase universe
-              ((member t) (mapcar #'ert-get-test
-                                  (apropos-internal selector #'ert-test-boundp)))
-              (list (cl-remove-if-not
-                     (lambda (test)
-                       (and (ert-test-name test)
-                            (string-match selector
-                                          (symbol-name (ert-test-name test)))))
-                     universe)))
-          (ert-runner/ert-select-tests selector universe))))
+;; Work around Emacs bug #16121, which is fixed in Emacs 24.4, but still present
+;; in former releases. See ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
+(when (version< emacs-version "24.4")
+  ;; Remember the original definition
+  (declare-function ert-runner/ert-select-tests "ert-runner"
+                    (selector universe))
+  (fset 'ert-runner/ert-select-tests (symbol-function 'ert-select-tests))
+  ;; And fix handling of string selectors
+  (fset 'ert-select-tests
+        (lambda (selector universe)
+          (if (stringp selector)
+              (cl-etypecase universe
+                ((member t) (mapcar #'ert-get-test
+                                    (apropos-internal selector #'ert-test-boundp)))
+                (list (cl-remove-if-not
+                       (lambda (test)
+                         (and (ert-test-name test)
+                              (string-match selector
+                                            (symbol-name (ert-test-name test)))))
+                       universe)))
+            (ert-runner/ert-select-tests selector universe)))))
 
 (defun ert-runner/add-selector (selector)
   (add-to-list 'ert-runner-selector selector 'append))
