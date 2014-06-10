@@ -1,7 +1,7 @@
 ;;; ert-runner.el --- Opinionated Ert testing workflow
 
 ;; Copyright (C) 2013, 2014 Johan Andersson
-;; Copyright (C) 2013 Sebastian Wiesner <lunaryorn@gmail.com>
+;; Copyright (C) 2013 Sebastian Wiesner <swiesner@lunaryorn.com>
 ;; Copyright (C) 2013 Jorgen Schaefer <contact@jorgenschaefer.de>
 
 ;; Author: Johan Andersson <johan.rejeep@gmail.com>
