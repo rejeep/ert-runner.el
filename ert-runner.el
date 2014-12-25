@@ -62,7 +62,7 @@
   "The buffer in which test output is stored in case it is
 needed by a reporter later.")
 
-(defvar ert-runner-reporter-name "ert"
+(defvar ert-runner-reporter-name "dot"
   "The reporter to use.")
 
 (defvar ert-runner-reporter-run-started-functions nil
