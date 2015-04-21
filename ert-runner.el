@@ -167,18 +167,21 @@ primarily intended for reporters."
       (setq file (f-expand file)))
   (load file nil :nomessage))
 
+(defun ert-runner--test-files (paths)
+  "Return list of test files to run."
+  (let ((el-tests-fn
+         (lambda (file)
+           (if paths
+               (--any? (s-ends-with? it file) paths)
+             (s-matches? "-test\.el$" file)))))
+    (f-files (f-expand ert-runner-test-path) el-tests-fn)))
+
 (defun ert-runner/run (&rest tests)
   (unless (f-dir? ert-runner-test-path)
     (error (ansi-red "No test directory. Create one using `ert-runner init`")))
   (ert-runner/use-reporter ert-runner-reporter-name)
-  (let* ((el-tests-fn
-          (lambda (file)
-            (if tests
-                (--any? (s-ends-with? it file) tests)
-              (s-matches? "-test\.el$" file))))
-         (test-files (f-files (f-expand ert-runner-test-path) el-tests-fn))
-         (test-helper
-          (f-expand "test-helper.el" ert-runner-test-path)))
+  (let ((test-files (ert-runner--test-files tests))
+        (test-helper (f-expand "test-helper.el" ert-runner-test-path)))
     (-each ert-runner-load-files #'ert-runner--load)
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))
