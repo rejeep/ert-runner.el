@@ -174,7 +174,7 @@ primarily intended for reporters."
            (if paths
                (--any? (s-ends-with? it file) paths)
              (s-matches? "-test\.el$" file)))))
-    (f-files (f-expand ert-runner-test-path) el-tests-fn)))
+    (f-files (f-expand ert-runner-test-path) el-tests-fn t)))
 
 (defun ert-runner/run (&rest tests)
   (unless (f-dir? ert-runner-test-path)
