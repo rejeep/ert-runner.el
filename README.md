@@ -30,10 +30,6 @@ Run specific tests:
 
     $ cask exec ert-runner test/foo-test.el test/bar-test.el
 
-Same as above:
-
-    $ cask exec ert-runner foo-test.el bar-test.el
-
 Run test whose name matches a pattern:
 
     $ cask exec ert-runner -p pattern
@@ -59,7 +55,7 @@ Run all tests, whose name matches `request`, and which are tagged `fast` or
 `important`, but *not* `network`:
 
     $ cask exec ert-runner -p request -t fast,important -t !network
-    
+
 Run in "no win" mode:
 
     $ cask exec ert-runner --no-win
