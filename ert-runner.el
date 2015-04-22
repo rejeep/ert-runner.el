@@ -169,16 +169,24 @@ primarily intended for reporters."
 
 (defun ert-runner--test-files (paths)
   "Return list of test files to run."
-  (let ((el-tests-fn
-         (lambda (file)
-           (if paths
-               (--any? (s-ends-with? it file) paths)
-             (s-matches? "-test\.el$" file)))))
-    (f-files (f-expand ert-runner-test-path) el-tests-fn t)))
+  (unless paths
+    (if (f-dir? ert-runner-test-path)
+        (setq paths (list ert-runner-test-path))
+      (error (ansi-red "No test directory. Create one using `ert-runner init`."))))
+  (-flatten
+   (mapcar (lambda (p)
+             (let ((path (f-expand p)))
+               (unless (f-exists? path)
+                 (error (ansi-red (format "`%s` does not exist." path))))
+               (if (f-dir? path)
+                   (f-files path
+                            (lambda (file)
+                              (s-matches? "-test\.el$" file))
+                            t)
+                 path)))
+           paths)))
 
 (defun ert-runner/run (&rest tests)
-  (unless (f-dir? ert-runner-test-path)
-    (error (ansi-red "No test directory. Create one using `ert-runner init`")))
   (ert-runner/use-reporter ert-runner-reporter-name)
   (let ((test-files (ert-runner--test-files tests))
         (test-helper (f-expand "test-helper.el" ert-runner-test-path)))
