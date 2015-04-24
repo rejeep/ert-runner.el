@@ -11,7 +11,7 @@ test: clean-elc
 	${MAKE} clean-elc
 
 ecukes: elpa
-	${CASK} exec ecukes --script features --debug
+	${CASK} exec ecukes --script features
 
 compile:
 	${CASK} exec ${EMACS} -Q -batch -f batch-byte-compile ert-runner.el
