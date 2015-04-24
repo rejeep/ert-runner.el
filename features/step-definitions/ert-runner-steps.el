@@ -13,6 +13,10 @@
               (get-buffer-create buffer-name)))
            (default-directory (f-full ert-runner-project-root-path))
            (args (cons "exec" (s-split " " command)))
+           (args
+            (if (-contains? args "--reporter")
+                args
+              (append args (list "--reporter" "ert"))))
            (exit-code
             (apply
              'call-process
