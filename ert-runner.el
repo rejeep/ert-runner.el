@@ -156,7 +156,7 @@ primarily intended for reporters."
 
 (defun ert-runner/load-path (path)
   "Append PATH to `load-path'."
-  (add-to-list 'load-path path nil))
+  (add-to-list 'load-path path))
 
 (defun ert-runner/usage ()
   "Show usage information."
