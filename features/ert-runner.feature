@@ -8,7 +8,7 @@ Feature: Ert Runner
       (ert-deftest bar-test ())
       (ert-deftest baz-test ())
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el --pattern foo"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el --pattern foo"
     Then I should see output:
       """
          passed  1/2  foo-test
@@ -25,7 +25,7 @@ Feature: Ert Runner
       (ert-deftest but-not-this ())
       (ert-deftest and-not-this ())
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el --tags foo,bar"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el --tags foo,bar"
     Then I should see test output:
       | name          | success |
       | this-test     | t       |
@@ -40,7 +40,7 @@ Feature: Ert Runner
       (ert-deftest but-this-one ())
       (ert-deftest and-this-one-too ())
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el --tags !foo"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el --tags !foo"
     Then I should see test output:
       | name              | success |
       | this-test         | t       |
@@ -56,7 +56,7 @@ Feature: Ert Runner
       (ert-deftest and-not-this-test () :tags '(foo))
       (ert-deftest and-not-this-one () :tags '(bar foo))
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el --tags !foo --tags bar"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el --tags !foo --tags bar"
     Then I should see output:
       """
          passed  1/1  this-test
@@ -71,7 +71,7 @@ Feature: Ert Runner
       (ert-deftest and-not-this-test () :tags '(foo))
       (ert-deftest and-not-this-one () :tags '(bar))
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el --tags bar --pattern test"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el --tags bar --pattern test"
     Then I should see output:
       """
          passed  1/1  this-test
@@ -87,7 +87,7 @@ Feature: Ert Runner
       """
       (ert-deftest foo () (foo))
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el"
     Then I should not see error "(void-function foo)"
 
   Scenario: Only run specified files
@@ -99,7 +99,7 @@ Feature: Ert Runner
       """
       (ert-deftest bar-test () (error "BOOM"))
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el"
     Then I should not see error "BOOM"
 
   Scenario: Run multiple files
@@ -111,7 +111,7 @@ Feature: Ert Runner
       """
       (ert-deftest bar-test ())
       """
-    When I run cask exec "{ERT-RUNNER} foo-test.el bar-test.el"
+    When I run cask exec "{ERT-RUNNER} test/foo-test.el test/bar-test.el"
     Then I should see output:
       """
          passed  1/2  bar-test
