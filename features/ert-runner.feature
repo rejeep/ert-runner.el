@@ -91,7 +91,7 @@ Feature: Ert Runner
     Then I should not see error "(void-function foo)"
 
   Scenario: Only run specified files
-    When I create a test file called "foo-test.el" with content:
+    When I create a test file called "foo.el" with content:
       """
       (ert-deftest foo-test ())
       """
@@ -99,7 +99,7 @@ Feature: Ert Runner
       """
       (ert-deftest bar-test () (error "BOOM"))
       """
-    When I run cask exec "{ERT-RUNNER} test/foo-test.el"
+    When I run cask exec "{ERT-RUNNER} test/foo.el"
     Then I should not see error "BOOM"
 
   Scenario: Run multiple files
@@ -117,6 +117,27 @@ Feature: Ert Runner
          passed  1/2  bar-test
          passed  2/2  foo-test
       """
+
+  Scenario: Nested test directories
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest foo-test ())
+      """
+    When I create a test directory called "subdir"
+    When I create a test file called "subdir/bar-test.el" with content:
+      """
+      (ert-deftest bar-test ())
+      """
+    When I run cask exec "{ERT-RUNNER}"
+    Then I should see output:
+      """
+         passed  1/2  bar-test
+         passed  2/2  foo-test
+      """
+
+  Scenario: Nonexistent files
+    When I run cask exec "{ERT-RUNNER} test/missing-test.el"
+    Then I should see error "/missing-test.el` does not exist"
 
   Scenario: Run all files ending with -test.el automatically
     When I create a test file called "foo.el" with content:
