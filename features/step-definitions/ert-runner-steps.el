@@ -2,6 +2,10 @@
   (lambda (file content)
     (f-write-text content 'utf-8 (f-expand file ert-runner-project-test-path))))
 
+(When "^I create a test directory called \"\\([^\"]+\\)\"$"
+  (lambda (directory)
+    (f-mkdir (f-expand directory ert-runner-project-test-path))))
+
 (When "^I run cask exec \"\\([^\"]+\\)\"$"
   (lambda (command)
     (setq command (s-replace "{ERT-RUNNER}" ert-runner-bin-path command))

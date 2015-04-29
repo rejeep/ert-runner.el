@@ -167,18 +167,35 @@ primarily intended for reporters."
       (setq file (f-expand file)))
   (load file nil :nomessage))
 
+(defun ert-runner--expand-test-path (path)
+  "Build expanded list of test files from PATH.
+Paths to files will simply be expanded, whereas paths to
+directories will be recursively checked for \"*-test.el\" files.
+An error will be signaled if a named file does not exist."
+  (setq path (f-expand path))
+  (unless (f-exists? path)
+    (error (ansi-red (format "`%s` does not exist." path))))
+  (if (f-dir? path)
+      (f-files path
+               (lambda (file)
+                 (s-matches? "-test\.el$" file))
+               t)
+    path))
+
+(defun ert-runner--test-files (paths)
+  "Expand PATHS into a list of test files to run.
+See `ert-runner--expand-test-path' for details.  If PATHS is
+nil, `ert-runner-test-path' will be used instead."
+  (unless paths
+    (if (f-dir? ert-runner-test-path)
+        (setq paths (list ert-runner-test-path))
+      (error (ansi-red "No test directory. Create one using `ert-runner init`."))))
+  (-flatten (mapcar #'ert-runner--expand-test-path paths)))
+
 (defun ert-runner/run (&rest tests)
-  (unless (f-dir? ert-runner-test-path)
-    (error (ansi-red "No test directory. Create one using `ert-runner init`")))
   (ert-runner/use-reporter ert-runner-reporter-name)
-  (let* ((el-tests-fn
-          (lambda (file)
-            (if tests
-                (--any? (s-ends-with? it file) tests)
-              (s-matches? "-test\.el$" file))))
-         (test-files (f-files (f-expand ert-runner-test-path) el-tests-fn))
-         (test-helper
-          (f-expand "test-helper.el" ert-runner-test-path)))
+  (let ((test-files (ert-runner--test-files tests))
+        (test-helper (f-expand "test-helper.el" ert-runner-test-path)))
     (-each ert-runner-load-files #'ert-runner--load)
     (if (f-exists? test-helper)
         (ert-runner--load test-helper))

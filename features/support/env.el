@@ -34,4 +34,5 @@
    (princ (ansi-red "%s" ert-runner-error))))
 
 (Before
- (mapc 'f-delete (f-glob "*.el" ert-runner-project-test-path)))
+ (mapc 'f-delete
+       (f--entries ert-runner-project-test-path (s-matches? ".el$" it) t)))
