@@ -48,7 +48,7 @@
                                   (if (= (ert-stats-total stats) 1)
                                       ""
                                     "s")
-                                  (time-to-seconds
+                                  (float-time
                                    (time-subtract (current-time)
                                                   ert-runner-reporter-dot-start-time))
                                   (if (zerop expected-failures)
