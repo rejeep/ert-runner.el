@@ -93,3 +93,39 @@ Feature: Test Reporter
       1 unexpected results:
          FAILED  foo-test
       """
+
+  Scenario: Dot reporter expected fail failed
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest xfail-failed () :expected-result :failed (should nil))
+      """
+    And I run cask exec "{ERT-RUNNER} --reporter dot"
+    Then I should see output:
+      """
+      f
+
+      Ran 1 test in 0
+      """
+    And I should see output:
+      """
+      1 expected failures
+      """
+
+  Scenario: Dot reporter expected fail passed
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest xfail-passed () :expected-result :failed (should t))
+      """
+    And I run cask exec "{ERT-RUNNER} --reporter dot"
+    Then I should see error:
+      """
+      Test xfail-passed passed unexpectedly
+      P
+
+      Ran 1 test in 0
+      """
+    And I should see error:
+      """
+      1 unexpected results:
+         PASSED  xfail-passed
+      """

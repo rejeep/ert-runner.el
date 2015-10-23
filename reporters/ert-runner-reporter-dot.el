@@ -48,7 +48,7 @@
                                   (if (= (ert-stats-total stats) 1)
                                       ""
                                     "s")
-                                  (time-to-seconds
+                                  (float-time
                                    (time-subtract (current-time)
                                                   ert-runner-reporter-dot-start-time))
                                   (if (zerop expected-failures)
@@ -66,9 +66,11 @@
 
 (add-hook 'ert-runner-reporter-test-ended-functions
           (lambda (stats test result)
-            (if (ert-test-result-expected-p test result)
-                (ert-runner-message ".")
-              (ert-runner-message "F"))))
+            (let ((expectedp (ert-test-result-expected-p test result)))
+              (ert-runner-message
+               (char-to-string
+                (ert-char-for-test-result result expectedp))))))
+
 
 (provide 'ert-runner-reporter-dot)
 ;;; ert-runnert-reporter-dot.el ends here
