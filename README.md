@@ -1,8 +1,14 @@
-# ert-runner.el [![Build Status](https://api.travis-ci.org/rejeep/ert-runner.el.png?branch=master)](http://travis-ci.org/rejeep/ert-runner.el)
+# ert-runner.el
 
-Ert-runner is a tool for Emacs projects tested using Ert. It assumes a
-certain test structure setup and can therefore make running tests
-easier.
+[![Build Status](https://travis-ci.org/rejeep/ert-runner.el.svg)](https://travis-ci.org/rejeep/ert-runner.el)
+[![Coverage Status](https://coveralls.io/repos/rejeep/ert-runner.el/badge.svg)](https://coveralls.io/r/rejeep/ert-runner.el)
+[![MELPA](http://melpa.org/packages/ert-runner-badge.svg)](http://melpa.org/#/ert-runner)
+[![MELPA Stable](http://stable.melpa.org/packages/ert-runner-badge.svg)](http://stable.melpa.org/#/ert-runner)
+[![Tag Version](https://img.shields.io/github/tag/rejeep/ert-runner.el.svg)](https://github.com/rejeep/ert-runner.el/tags)
+[![License](http://img.shields.io/:license-gpl3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
+
+> Ert-runner is a tool for Emacs projects tested using Ert.
+> It assumes a certain test structure setup and can therefore make running tests easier.
 
 ## Installation
 
