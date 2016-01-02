@@ -8,4 +8,5 @@
  (depends-on "dash")
  (depends-on "f")
  (depends-on "ecukes")
- (depends-on "ansi"))
+ (depends-on "ansi")
+ (depends-on "undercover"))

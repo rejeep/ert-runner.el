@@ -21,6 +21,10 @@
 (defvar ert-runner-output "")
 (defvar ert-runner-error "")
 
+(require 'undercover)
+(undercover "*.el"
+	    (:exclude "*-test.el")
+	    (:report-file "/tmp/undercover-report.json"))
 (require 'espuds)
 (require 'ansi)
 (require 'ert)
