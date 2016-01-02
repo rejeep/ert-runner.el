@@ -22,9 +22,7 @@
 (defvar ert-runner-error "")
 
 (require 'undercover)
-(undercover "*.el"
-	    (:exclude "*-test.el")
-	    (:report-file "/tmp/undercover-report.json"))
+(undercover "*.el")
 (require 'espuds)
 (require 'ansi)
 (require 'ert)
