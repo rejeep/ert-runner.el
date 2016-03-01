@@ -2,11 +2,15 @@
 
 ERT_RUNNER="$(dirname $(dirname $0))/ert-runner.el"
 
-if [[ -n "$INSIDE_EMACS" ]]; then
-  ERT_RUNNER_EMACS="emacs"
-else
-  ERT_RUNNER_EMACS="${EMACS:-emacs}"
-fi
+function inside_emacs_24 {
+  if [[ -n $INSIDE_EMACS ]] &&
+         ## Emacs-24 sets INSIDE_EMACS to t with M-x compile, and to a string
+         ## starting with version numbers in shell
+         ([[ $INSIDE_EMACS == t ]] || [[ $INSIDE_EMACS == 24* ]]); then
+      return 0
+  fi
+  return 1
+}
 
 function has_option {
   for opt in "${@:2}"; do
@@ -14,6 +18,12 @@ function has_option {
   done
   return 1
 }
+
+if inside_emacs_24; then
+  ERT_RUNNER_EMACS="emacs"
+else
+  ERT_RUNNER_EMACS="${EMACS:-emacs}"
+fi
 
 export ERT_RUNNER_ARGS="${@}"
 
