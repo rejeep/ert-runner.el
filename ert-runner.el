@@ -55,7 +55,7 @@
 (defvar ert-runner-test-path (f-expand "test")
   "Path to test dir.")
 
-(defvar ert-runner-verbose t
+(defvar ert-runner-verbose nil
   "If true, show all message output, otherwise hide.")
 
 (defvar ert-runner-output-buffer "*ert-runner outout*"
@@ -226,7 +226,7 @@ nil, `ert-runner-test-path' will be used instead."
   (setq ert-runner-verbose t))
 
 (defun ert-runner/quiet ()
-  "Do not show package output."
+  "Do not show package output (default)."
   (when noninteractive
     (setq ert-runner-verbose nil)))
 
