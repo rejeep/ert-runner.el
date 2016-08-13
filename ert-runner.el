@@ -231,7 +231,7 @@ nil, `ert-runner-test-path' will be used instead."
     (setq ert-runner-verbose nil)))
 
 (defun ert-runner/set-reporter (name)
-  "Set the reporter (default: ert)."
+  "Set the reporter (default: dot)."
   (setq ert-runner-reporter-name name))
 
 (defun ert-runner/use-reporter (name)
