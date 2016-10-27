@@ -234,13 +234,21 @@ nil, `ert-runner-test-path' will be used instead."
   "Set the reporter (default: dot)."
   (setq ert-runner-reporter-name name))
 
+(defun ert-runner/reporters ()
+  "List available reporters."
+  (-map
+   (lambda (file)
+     (message (s-chop-prefix "ert-runner-reporter-" (f-no-ext (f-filename file)))))
+   (f-files ert-runner-reporters-path))
+  (kill-emacs 0))
+
 (defun ert-runner/use-reporter (name)
   (let ((reporter-lib-name (format "ert-runner-reporter-%s" name)))
     (when (not (require (intern reporter-lib-name)
                         (f-expand reporter-lib-name
                                   ert-runner-reporters-path)
                         t))
-      (error (ansi-red (format "Invalid reporter: %s" name))))))
+      (error (ansi-red (format "Invalid reporter %s, list available with --reporters" name))))))
 
 (defun ert-runner/run-tests-batch-and-exit (selector)
   "Run tests in SELECTOR and exit Emacs."
@@ -335,6 +343,7 @@ nil, `ert-runner-test-path' will be used instead."
  (option "--quiet" ert-runner/quiet)
  (option "--verbose" ert-runner/verbose)
  (option "--reporter <name>" ert-runner/set-reporter)
+ (option "--reporters" ert-runner/reporters)
  (option "-L <path>" ert-runner/load-path)
 
  (option "--script" "Run Emacs as a script/batch job (default)" ignore)
