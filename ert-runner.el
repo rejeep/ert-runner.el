@@ -105,8 +105,10 @@ Arguments: stats, test, result")
 
 This bypasses the normal output capturing ert-runner does, and is
 primarily intended for reporters."
-  (princ (apply #'format format args)
-         t))
+  (let ((message (apply #'format format args)))
+    (if ert-runner-output-file
+        (f-append-text message 'utf-8 ert-runner-output-file)
+      (princ message t))))
 
 ;; Work around Emacs bug #16121, which is fixed in Emacs 24.4, but still present
 ;; in former releases. See ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
