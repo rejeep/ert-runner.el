@@ -353,4 +353,5 @@ nil, `ert-runner-test-path' will be used instead."
  (command "init [name]" ert-runner/init)
  (command "help" ert-runner/usage))
 
+(provide 'ert-runner)
 ;;; ert-runner.el ends here
