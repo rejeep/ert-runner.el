@@ -137,7 +137,7 @@ Feature: Ert Runner
 
   Scenario: Nonexistent files
     When I run cask exec "{ERT-RUNNER} test/missing-test.el"
-    Then I should see error "/missing-test.el` does not exist"
+    Then I should see error "/missing-test.el‘ does not exist"
 
   Scenario: Run all files ending with -test.el automatically
     When I create a test file called "foo.el" with content:
