@@ -198,14 +198,19 @@ nil, `ert-runner-test-path' will be used instead."
   (ert-runner/use-reporter ert-runner-reporter-name)
   (let ((test-files (ert-runner--test-files tests))
         (test-helper (f-expand "test-helper.el" ert-runner-test-path)))
-    (-each ert-runner-load-files #'ert-runner--load)
-    (if (f-exists? test-helper)
-        (ert-runner--load test-helper))
-    (-each test-files #'ert-runner--load)
+    (condition-case e
+        (progn
+          (-each ert-runner-load-files #'ert-runner--load)
+          (if (f-exists? test-helper)
+              (ert-runner--load test-helper))
+          (-each test-files #'ert-runner--load))
+      (error
+       (ert-runner-message "Error during test setup: %S. No tests were run.\n" e)
+       (kill-emacs 1)))
     (if ert-runner-verbose
         (ert-runner/run-tests-batch-and-exit ert-runner-selector)
       (shut-up
-       (ert-runner/run-tests-batch-and-exit ert-runner-selector)))))
+        (ert-runner/run-tests-batch-and-exit ert-runner-selector)))))
 
 (defun ert-runner/init (&optional name)
   "Create new test project (optional project name)."
