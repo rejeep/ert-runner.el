@@ -210,12 +210,23 @@ nil, `ert-runner-test-path' will be used instead."
   (unless name (setq name (f-filename default-directory)))
   (if (f-dir? "test")
       (error (ansi-red "Directory `test` already exists.")))
-  (f-mkdir ert-runner-test-path)
-  (f-touch (f-join ert-runner-test-path "test-helper.el"))
-  (f-touch (f-join ert-runner-test-path (s-concat name "-test.el")))
   (message "create %s" (ansi-green (f-filename ert-runner-test-path)))
+  (f-mkdir ert-runner-test-path)
   (message "create  %s" (ansi-green "test-helper.el"))
-  (message "create  %s" (ansi-green (s-concat name "-test.el"))))
+  (let ((test-file (s-concat name "-test.el")))
+    (with-temp-file (f-join ert-runner-test-path "test-helper.el")
+      (insert (format "\
+;;; test-helper.el --- Helpers for %s
+
+;;; test-helper.el ends here
+" test-file)))
+    (message "create  %s" (ansi-green (s-concat name "-test.el")))
+    (with-temp-file (f-join ert-runner-test-path test-file)
+      (insert (format "\
+;;; %s --- Tests for %s
+
+;;; %s ends here
+" test-file name test-file)))))
 
 (defun ert-runner/debug ()
   "Enable debug."
