@@ -174,7 +174,7 @@ directories will be recursively checked for \"*-test.el\" files.
 An error will be signaled if a named file does not exist."
   (setq path (f-expand path))
   (unless (f-exists? path)
-    (error (ansi-red (format "`%s` does not exist." path))))
+    (error "%s" (ansi-red (format "`%s` does not exist." path))))
   (if (f-dir? path)
       (f-files path
                (lambda (file)
@@ -189,7 +189,7 @@ nil, `ert-runner-test-path' will be used instead."
   (unless paths
     (if (f-dir? ert-runner-test-path)
         (setq paths (list ert-runner-test-path))
-      (error (ansi-red "No test directory. Create one using `ert-runner init`."))))
+      (error "%s" (ansi-red "No test directory. Create one using `ert-runner init`."))))
   (-flatten (mapcar #'ert-runner--expand-test-path paths)))
 
 (defun ert-runner/run (&rest tests)
@@ -209,7 +209,7 @@ nil, `ert-runner-test-path' will be used instead."
   "Create new test project (optional project name)."
   (unless name (setq name (f-filename default-directory)))
   (if (f-dir? "test")
-      (error (ansi-red "Directory `test` already exists.")))
+      (error "%s" (ansi-red "Directory `test` already exists.")))
   (message "create %s" (ansi-green (f-filename ert-runner-test-path)))
   (f-mkdir ert-runner-test-path)
   (message "create  %s" (ansi-green "test-helper.el"))
