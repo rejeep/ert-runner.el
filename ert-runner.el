@@ -346,7 +346,8 @@ nil, `ert-runner-test-path' will be used instead."
           (run-hook-with-args 'ert-runner-reporter-test-ended-functions
                               stats test result)))))))
 
-(setq commander-args (-reject 's-blank? (s-split " " (getenv "ERT_RUNNER_ARGS"))))
+(-when-let (args (getenv "ERT_RUNNER_ARGS"))
+  (setq commander-args (-reject 's-blank? (s-split " " args))))
 
 (commander
  (name "ert-runner")
