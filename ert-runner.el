@@ -30,6 +30,10 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Commentary:
+
+;; Opinionated Ert testing workflow.
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -300,16 +304,18 @@ nil, `ert-runner-test-path' will be used instead."
                (with-temp-buffer
                  (let ((backtrace
                         (ert-test-result-with-condition-backtrace result)))
-                   ;; The signature of ‘ert--print-backtrace’ has changed in
-                   ;; Emacs 26: it now takes two arguments.  We try to call it
-                   ;; with the new calling convention first and fall back to
-                   ;; the old one in case of error.
-                   ;; FIXME: We shouldn’t be using internal functions from
-                   ;; ert.el in the first place.
-                   (condition-case nil
-                       (ert--print-backtrace backtrace nil)
-                     (wrong-number-of-arguments
-                      (ert--print-backtrace backtrace))))
+		   (if (> emacs-major-version 26)
+		       (backtrace-to-string backtrace)
+		     ;; The signature of ‘ert--print-backtrace’ has changed in
+                     ;; Emacs 26: it now takes two arguments.  We try to call
+                     ;; it with the new calling convention first and fall back
+                     ;; to the old one in case of error.  FIXME: We shouldn’t
+                     ;; be using internal functions from ert.el in the first
+                     ;; place.
+                     (condition-case nil
+			 (ert--print-backtrace backtrace nil)
+		       (wrong-number-of-arguments
+			(ert--print-backtrace backtrace)))))
                  (goto-char (point-min))
                  (while (not (eobp))
                    (let ((start (point))
