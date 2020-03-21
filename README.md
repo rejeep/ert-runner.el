@@ -1,4 +1,4 @@
-# ert-runner.el [![Build Status](https://api.travis-ci.org/rejeep/ert-runner.el.png?branch=master)](http://travis-ci.org/rejeep/ert-runner.el)
+# ert-runner.el
 
 Ert-runner is a tool for Emacs projects tested using Ert. It assumes a
 certain test structure setup and can therefore make running tests
