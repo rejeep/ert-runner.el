@@ -21,7 +21,7 @@ clean-elc:
 
 elpa: ${PKG_DIR}
 ${PKG_DIR}:
-	$(shell cd features/project ; ${CASK} install)
+	cd features/project && ${CASK} install
 	touch $@
 
 .PHONY:	all test compile clean-elc ecukes

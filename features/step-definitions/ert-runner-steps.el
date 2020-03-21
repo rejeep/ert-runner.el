@@ -26,7 +26,14 @@
              'call-process
              (append (list "cask" nil buffer nil) args))))
       (with-current-buffer buffer
-        (let ((content (buffer-string)))
+        (let ((content
+               ;; to display consistent errors across emacs versions
+               ;; we use the pre 25.1 style
+               (replace-regexp-in-string
+                "’" "'"
+                (replace-regexp-in-string
+                 "‘" "`"
+                 (buffer-string)))))
           (cond ((= exit-code 0)
                  (setq ert-runner-output content))
                 (t
