@@ -4,9 +4,9 @@ setlocal enabledelayedexpansion
 
 set ert_runner=ert-runner
 
-if not [%inside_emacs%]==[] (
+if defined inside_emacs (
   set ert_runner_emacs=emacs
-) else if not [%emacs%]==[] (
+) else if defined emacs (
   set ert_runner_emacs=%emacs%
 ) else (
   set ert_runner_emacs=emacs
