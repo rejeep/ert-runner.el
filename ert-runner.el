@@ -62,6 +62,9 @@
 (defvar ert-runner-verbose t
   "If true, show all message output, otherwise hide.")
 
+(defvar ert-runner-profile t
+  "If true, show profiling output, otherwise hide.")
+
 (defvar ert-runner-output-buffer "*ert-runner outout*"
   "The buffer in which test output is stored in case it is
 needed by a reporter later.")
@@ -240,6 +243,10 @@ nil, `ert-runner-test-path' will be used instead."
   "Show package output."
   (setq ert-runner-verbose t))
 
+(defun ert-runner/profile ()
+  "Show profiling output."
+  (setq ert-runner-profiler t))
+
 (defun ert-runner/quiet ()
   "Do not show package output."
   (when noninteractive
@@ -267,7 +274,15 @@ nil, `ert-runner-test-path' will be used instead."
 
 (defun ert-runner/run-tests-batch-and-exit (selector)
   "Run tests in SELECTOR and exit Emacs."
+  (when ert-runner-profile
+    (profiler-start 'cpu))
   (let ((stats (ert-runner/run-tests-batch selector)))
+    (when ert-runner-profile
+      (profiler-report)
+      (profiler-report-write-profile "ert-profile")
+      (profiler-stop)
+      (message "Profile saved as to file ert-profile")
+      (message "Use `profiler-find-profile' to view"))
     (kill-emacs (if (zerop (ert-stats-completed-unexpected stats)) 0 1))))
 
 (defun ert-runner/run-tests-batch (selector)
@@ -369,6 +384,7 @@ nil, `ert-runner-test-path' will be used instead."
  (option "--debug" ert-runner/debug)
  (option "--quiet" ert-runner/quiet)
  (option "--verbose" ert-runner/verbose)
+ (option "--profile" ert-runner/profile)
  (option "--reporter <name>" ert-runner/set-reporter)
  (option "--reporters" ert-runner/reporters)
  (option "-L <path>" ert-runner/load-path)
