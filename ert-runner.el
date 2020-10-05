@@ -62,7 +62,7 @@
 (defvar ert-runner-verbose t
   "If true, show all message output, otherwise hide.")
 
-(defvar ert-runner-profile t
+(defvar ert-runner-profile nil
   "If true, show profiling output, otherwise hide.")
 
 (defvar ert-runner-output-buffer "*ert-runner outout*"
