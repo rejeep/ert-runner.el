@@ -112,8 +112,10 @@ Arguments: stats, test, result")
 
 This bypasses the normal output capturing ert-runner does, and is
 primarily intended for reporters."
-  (princ (apply #'format format args)
-         t))
+  (let ((message (apply #'format format args)))
+    (if ert-runner-output-file
+        (f-append-text message 'utf-8 ert-runner-output-file)
+      (princ message t))))
 
 ;; Work around Emacs bug #16121, which is fixed in Emacs 24.4, but still present
 ;; in former releases. See ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=16121
@@ -203,14 +205,19 @@ nil, `ert-runner-test-path' will be used instead."
   (ert-runner/use-reporter ert-runner-reporter-name)
   (let ((test-files (ert-runner--test-files tests))
         (test-helper (f-expand "test-helper.el" ert-runner-test-path)))
-    (-each ert-runner-load-files #'ert-runner--load)
-    (if (f-exists? test-helper)
-        (ert-runner--load test-helper))
-    (-each test-files #'ert-runner--load)
+    (condition-case e
+        (progn
+          (-each ert-runner-load-files #'ert-runner--load)
+          (if (f-exists? test-helper)
+              (ert-runner--load test-helper))
+          (-each test-files #'ert-runner--load))
+      (error
+       (ert-runner-message "Error during test setup: %S. No tests were run.\n" e)
+       (kill-emacs 1)))
     (if ert-runner-verbose
         (ert-runner/run-tests-batch-and-exit ert-runner-selector)
       (shut-up
-       (ert-runner/run-tests-batch-and-exit ert-runner-selector)))))
+        (ert-runner/run-tests-batch-and-exit ert-runner-selector)))))
 
 (defun ert-runner/init (&optional name)
   "Create new test project (optional project name)."

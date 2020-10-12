@@ -3,6 +3,10 @@
 
 (package-file "ert-runner.el")
 
+(files ("*.el"
+        ("bin" "bin/*")
+        ("reporters" "reporters/*.el")))
+
 (development
  (depends-on "s")
  (depends-on "dash")
