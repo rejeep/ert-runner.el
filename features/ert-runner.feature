@@ -159,7 +159,7 @@ Feature: Ert Runner
          passed  2/2  foo-test
       """
 
-  Scenario: Load files
+  Scenario: Load file
     When I create a test file called "foo-init.el" with content:
       """
       (defun foo ())
@@ -173,6 +173,26 @@ Feature: Ert Runner
       """
          passed  1/1  foo-test
       """
+
+  Scenario: Load file and name test file
+    When I create a test file called "foo-init.el" with content:
+      """
+      (defun foo ())
+      """
+    When I create a test file called "foo-test.el" with content:
+      """
+      (ert-deftest foo-test () (foo))
+      """
+    When I create a test file called "bar-test.el" with content:
+      """
+      (ert-deftest bar-test () (error "BOOM"))
+      """
+    When I run cask exec "{ERT-RUNNER} --load test/foo-init.el test/foo.el"
+    Then I should see output:
+      """
+         passed  1/1  foo-test
+      """
+    Then I should not see error "BOOM"
 
   Scenario: Load path
     When I create a test file called "foo-init.el" with content:
