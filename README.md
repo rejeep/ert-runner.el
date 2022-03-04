@@ -18,7 +18,8 @@ View usage information:
 
     $ cask exec ert-runner help
 
-Create new test directory and files:
+Test files should be placed under the `test/` directory as `*-test.el`
+files. Or let ert-runner create the test directory and files for you:
 
     $ cask exec ert-runner init
 
