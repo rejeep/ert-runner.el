@@ -69,7 +69,9 @@
             (let ((expectedp (ert-test-result-expected-p test result)))
               (ert-runner-message
                (char-to-string
-                (ert-char-for-test-result result expectedp))))))
+                (ert-char-for-test-result result expectedp)))
+              ;; See https://stackoverflow.com/a/66558297/875001
+              (set-binary-mode 'stdout nil))))
 
 
 (provide 'ert-runner-reporter-dot)
