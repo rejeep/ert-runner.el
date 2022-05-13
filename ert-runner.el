@@ -261,7 +261,7 @@ nil, `ert-runner-test-path' will be used instead."
   (-map
    (lambda (file)
      (message (s-chop-prefix "ert-runner-reporter-" (f-no-ext (f-filename file)))))
-   (f-files ert-runner-reporters-path))
+   (f-files ert-runner-reporters-path (lambda (file) (equal (f-ext file) "el"))))
   (kill-emacs 0))
 
 (defun ert-runner/use-reporter (name)
