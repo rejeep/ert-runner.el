@@ -71,7 +71,11 @@
                (char-to-string
                 (ert-char-for-test-result result expectedp)))
               ;; See https://stackoverflow.com/a/66558297/875001
-              (set-binary-mode 'stdout nil))))
+              ;; set-binary-mode was added in emacs 25.1, so on older
+              ;; versions the output will still be buffered.  When we
+              ;; bump minimal version, this check can be deleted.
+              (when (fboundp 'set-binary-mode)
+                (set-binary-mode 'stdout nil)))))
 
 
 (provide 'ert-runner-reporter-dot)
