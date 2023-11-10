@@ -245,7 +245,7 @@ nil, `ert-runner-test-path' will be used instead."
 
 (defun ert-runner/profile ()
   "Show profiling output."
-  (setq ert-runner-profiler t))
+  (setq ert-runner-profile t))
 
 (defun ert-runner/quiet ()
   "Do not show package output."
