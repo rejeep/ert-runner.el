@@ -157,9 +157,9 @@ primarily intended for reporters."
   "Run tests matching PATTERN."
   (ert-runner/add-selector pattern))
 
-(defun ert-runner/load (&rest load-files)
+(defun ert-runner/load (load-files)
   "Load LOAD-FILES."
-  (setq ert-runner-load-files load-files))
+  (setq ert-runner-load-files (list load-files)))
 
 (defun ert-runner/load-path (path)
   "Append PATH to `load-path'."
@@ -380,7 +380,7 @@ nil, `ert-runner-test-path' will be used instead."
  (option "--help, -h" ert-runner/usage)
  (option "--pattern <pattern>, -p <pattern>" ert-runner/pattern)
  (option "--tags <tags>, -t <tags>" ert-runner/tags)
- (option "--load <*>, -l <*>" ert-runner/load)
+ (option "--load <file>, -l <file>" ert-runner/load)
  (option "--debug" ert-runner/debug)
  (option "--quiet" ert-runner/quiet)
  (option "--verbose" ert-runner/verbose)
